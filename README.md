@@ -23,5 +23,5 @@ docker compose up --wait
 ## Routes
 
 -   Next.js Frontend: http://localhost:3000
--   api: http://localhost:80
--   docs: http://localhost:80/docs
+-   api: http://localhost:80/api
+-   api documentation: http://localhost:80/api/docs
