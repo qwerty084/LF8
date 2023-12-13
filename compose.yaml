@@ -43,6 +43,7 @@ services:
     volumes:
       - ./chirp-frontend:/app
       - /app/node_modules
+      - /app/.next
 
   ###> doctrine/doctrine-bundle ###
   database:
