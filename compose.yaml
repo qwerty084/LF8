@@ -7,7 +7,6 @@ services:
       - database
     restart: unless-stopped
     environment:
-      PWA_UPSTREAM: pwa:3000
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
@@ -33,6 +32,17 @@ services:
       - target: 443
         published: ${HTTP3_PORT:-443}
         protocol: udp
+
+  chirp-frontend:
+    build:
+      context: ./chirp-frontend
+      dockerfile: Dockerfile
+    container_name: chirp-frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./chirp-frontend:/app
+      - /app/node_modules
 
   ###> doctrine/doctrine-bundle ###
   database:
