@@ -25,3 +25,7 @@ docker compose up --wait
 -   Next.js Frontend: http://localhost:3000
 -   api: http://localhost:80/api
 -   api documentation: http://localhost:80/api/docs
+
+## Database (ERD)
+
+![Database](./ERD.drawio.png)
