@@ -6,7 +6,7 @@ import React from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 const darkMode = true
-export const textColor = darkMode ? "text-black" : "text-[#00cba2]"
+export const textColor = darkMode ? "text-[#00cba2]" : "text-black"
 export const bgColor = darkMode ? "bg-[#034d61]" : "bg-[#d9d9d9]"
 export const itemColor = darkMode ? "bg-[#d9d9d9]" : "bg-[#034d61]"
 

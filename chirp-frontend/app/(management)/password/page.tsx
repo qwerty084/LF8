@@ -52,7 +52,7 @@ return(
             />
           </div>
           <button
-            className="w-full bg-blue-500 hover:bg-[#034d61] text-white p-3 rouded-md "
+            className="w-full bg-blue-500 hover:bg-[#034d61] text-white p-3 rounded-md "
             type="submit"
           >
             Reset Password
