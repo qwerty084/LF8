@@ -1,13 +1,37 @@
 "use client";
 import React, { useState } from "react";
 import { itemColor } from "../../layout";
+import { env } from "../../../env"
+import { useCreate } from "../../../components/auth.component"
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassoword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  function handleSubmit() {}
+  async function handleSubmit() {
+    let url = `${env.API_URL}/api/auth`
+
+    const user = {
+      "email": email,
+      "password": password
+    }
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(user),
+    });
+
+    const data = await response.json();
+    if (data.message === "Unauthorized") {
+      console.log("Unauthorized");
+    } else {
+      useCreate(data.access_token);
+      window.location.href = "/";
+    }
+  }
 
   return (
     <div className="flex h-full w-full justify-center items-center">

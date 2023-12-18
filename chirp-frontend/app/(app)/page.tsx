@@ -136,7 +136,7 @@ export default function Home() {
         </div>
         <div
           id="userDetails"
-          className="flex flex-col w-1/4 h-full p-2 shadow-2xl"
+          className="flex flex-col w-1/4 h-full p-4 shadow-2xl hidden"
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
             <div
@@ -150,21 +150,21 @@ export default function Home() {
 
           <div id="status" className="flex flex-col mb-4">
             <span className="font-semibold">Status: </span>
-            <span className="text-green-500 p-2 rounded-md border-2 border-gray-500">
+            <span className="text-green-500 rounded-md">
               Online
             </span>
           </div>
 
           <div id="biography" className="flex flex-col mb-4 min-h-[10%]">
             <span className="font-semibold">Bio: </span>
-            <span className="p-2 rounded-md border-2 border-gray-500 h-full">
+            <span className="rounded-md h-full">
               {userDetails.bio}
             </span>
           </div>
 
           <div id="otherDetails" className="flex flex-col min-h-[50%]">
             <span className="font-semibold">Other Details: </span>
-            <span className="p-2 rounded-md border-2 border-gray-500 h-full">
+            <span className="rounded-md h-full">
               <p>Message Score: {userDetails.messagescore}</p>
               <p>Member since: {userDetails.createdAt}</p>
             </span>
@@ -173,7 +173,7 @@ export default function Home() {
 
         <div
           id="groupDetails"
-          className="flex flex-col w-1/4 h-full p-2 border-l-2 border-gray-500 hidden"
+          className="flex flex-col w-1/4 h-full p-4"
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
             <div
@@ -199,14 +199,14 @@ export default function Home() {
 
           <div id="description" className="flex flex-col mb-4 min-h-[10%]">
             <span className="font-semibold">Group Description: </span>
-            <span className="p-2 rounded-md border-2 border-gray-500 h-full">
+            <span className="rounded-md h-full">
               {groupDetails.description}
             </span>
           </div>
 
           <div id="otherDetails" className="flex flex-col min-h-[30%]">
             <span className="font-semibold">Other Details: </span>
-            <span className="p-2 rounded-md border-2 border-gray-500 h-full">
+            <span className="rounded-md h-full">
               <p>Message Score: {groupDetails.messages}</p>
               <p>Created At: {groupDetails.createdAt}</p>
             </span>

@@ -1,84 +1,113 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-interface GroupType {
-  [x: string]: any;
+interface MeetingType {
   id: number;
   name: string;
-  pfp: string;
+  description: string;
+  participants: number[]; //user ids
+  cooridinates: string;
+  date: string;
 }
 
-interface ContactType {
-  id: number;
-  name: string;
-  pfp: string;
-}
 export default function MeetAndGreet() {
-  const [groups, setGroups] = useState<GroupType[]>([]);
-  const [contacts, setContacts] = useState<ContactType[]>([]);
-  const [chat, setChat] = useState();
+  const [meetings, setMeetings] = useState<MeetingType[]>([]);
+  const [meeting, setMeeting] = useState<MeetingType>({
+    id: 1,
+    name: "first meeting",
+    description: "test",
+    participants: [1, 2, 3],
+    cooridinates: "123-123",
+    date: "2023-12-18",
+  });
 
-  function get_groups() {
-    setGroups([
-      { id: 1, name: "Group 1", pfp: "assets/test_pfp.png" },
-      { id: 2, name: "Group 2", pfp: "assets/test_pfp.png" },
-      { id: 3, name: "Group 3", pfp: "assets/test_pfp.png" },
+  function get_meets() {
+    setMeetings([
+      {
+        id: 1,
+        name: "first meeting",
+        description: "test",
+        participants: [1, 2, 3],
+        cooridinates: "123-123",
+        date: "2023-12-18",
+      },
+      {
+        id: 2,
+        name: "second meeting",
+        description: "test",
+        participants: [1, 2, 3],
+        cooridinates: "123-123",
+        date: "2023-12-18",
+      },
+      {
+        id: 3,
+        name: "third meeting",
+        description: "test",
+        participants: [1, 2, 3],
+        cooridinates: "123-123",
+        date: "2023-12-18",
+      },
     ]);
   }
-  function get_contacts() {
-    setContacts([
-      { id: 1, name: "Luca Helms", pfp: "assets/test_pfp.png" },
-      { id: 2, name: "Luca Helms", pfp: "assets/test_pfp.png" },
-      { id: 3, name: "Luca Helms", pfp: "assets/test_pfp.png" },
-      { id: 4, name: "Luca Helms", pfp: "assets/test_pfp.png" },
-    ]);
-  }
-  function get_chat(contact_id: number) {
-    return contact_id;
+
+  function get_meeting(meeting_id: number) {
+    setMeeting({});
   }
 
   useEffect(() => {
-    get_groups();
-    get_contacts();
+    get_meets();
   }, []);
+
   return (
     <div id="body" className="flex flex-row flex-grow">
       <div className="flex flex-col w-24 h-full shadow-custom">
-        {groups.map((group: any) => (
-          <div
-            key={group.id}
-            className="w-full flex justify-center cursor-pointer py-1 mt-4"
-          >
-            <img
-              src={group.pfp}
-              alt={group.name}
-              className="flex items-center justify-center w-14 rounded-full transition duration-700 ease-in-out hover:rounded-2xl"
-            />
-          </div>
-        ))}
         <div className="flex items-end justify-center h-full mb-4">
           settings
         </div>
       </div>
 
       <div className="flex flex-col justify-items-start w-1/6">
-        {contacts.map((contact: any) => (
+        {meetings.map((meeting: any) => (
           <div
-            key={contact.id}
+            key={meeting.id}
             className="flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none"
           >
-            <img
-              src={contact.pfp}
-              className="flex items-center w-14 rounded-full"
-            />
-            <p className="flex items-center text-xl">{contact.name}</p>
+            <p className="flex items-center text-xl">{meeting.name}</p>
+            <p>{meeting.date}</p>
           </div>
         ))}
       </div>
 
       <div className="flex flex-grow justify-between shadow-custom">
         <div id="chat" className="p-4 w-full">
-          chat
+          <div className="flex justify-evenly">
+            <input
+              type="text"
+              placeholder="Meet Name"
+              className="w-1/5 p-2 focus:outline-none shadow-xl text-xl bg-transparent"
+            />
+            <input
+              type="date"
+              placeholder="Meet Date"
+              className="w-1/5 p-2 focus:outline-none shadow-xl text-xl bg-transparent"
+            />
+          </div>
+          <div className="flex justify-evenly">
+            <input
+              type="text"
+              placeholder="Participants"
+              className="w-1/5 p-2 focus:outline-none shadow-xl text-xl bg-transparent"
+            />
+            <input
+              type="text"
+              placeholder="Descriptions/Plans"
+              className="w-1/5 p-2 focus:outline-none shadow-xl text-xl bg-transparent"
+            />
+          </div>
+          <iframe
+            className="w-3/5 h-1/2 rounded-xl"
+            src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=+()&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+          ></iframe>
         </div>
       </div>
     </div>

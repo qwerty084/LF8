@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { itemColor } from "../../layout";
+import { env } from "../../../env"
 
 export default function Registration() {
   const [email, setEmail] = useState("");
@@ -15,7 +16,26 @@ export default function Registration() {
       setPasswordError(true);
     } else {
       setPasswordError(false);
-      // Continue with form submission
+      let url = `${env.API_URL}/api/users`
+
+      const user = {
+        "email": email,
+        "username": displayName,
+        "password": password
+      }
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(user)
+      })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch((error) => {
+        console.error('Error:', error);
+      });
     }
   }
 
