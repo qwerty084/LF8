@@ -9,7 +9,8 @@ export default function Login() {
   const [password, setPassoword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  async function handleSubmit() {
+  async function handleSubmit(e: any) {
+    e.preventDefault();
     let url = `${env.API_URL}/api/auth`
 
     const user = {
@@ -25,10 +26,11 @@ export default function Login() {
     });
 
     const data = await response.json();
-    if (data.message === "Unauthorized") {
+    if (data.code === 401) {
       console.log("Unauthorized");
     } else {
-      useCreate(data.access_token);
+      console.log("authorized")
+      useCreate(data.token);
       window.location.href = "/";
     }
   }
