@@ -26,3 +26,6 @@ api_platform:
             JWT:
                 name: Authorization
                 type: header
+    openapi:
+        swagger_ui_extra_configuration:
+            persistAuthorization: true
