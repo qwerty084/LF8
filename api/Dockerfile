@@ -102,8 +102,3 @@ RUN set -eux; \
 	composer dump-env prod; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
-
-# create jwt private and public keys
-RUN php bin/console lexik:jwt:generate-keypair
-RUN setfacl -R -m u:www-data:rX -m u:"$(whoami)":rwX config/jwt
-RUN setfacl -dR -m u:www-data:rX -m u:"$(whoami)":rwX config/jwt
