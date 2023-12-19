@@ -35,7 +35,3 @@ docker-compose -f compose.prebuild.yaml up -d
 ## Database (ERD)
 
 ![Database](./ERD.drawio.png)
-
-```
-
-```
