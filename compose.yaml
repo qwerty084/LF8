@@ -33,18 +33,6 @@ services:
         published: ${HTTP3_PORT:-443}
         protocol: udp
 
-  chirp-frontend:
-    build:
-      context: ./chirp-frontend
-      dockerfile: Dockerfile
-    container_name: chirp-frontend
-    ports:
-      - 3000:3000
-    volumes:
-      - ./chirp-frontend:/app
-      - /app/node_modules
-      - /app/.next
-
   ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-15}-alpine
