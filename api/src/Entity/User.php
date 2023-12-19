@@ -9,6 +9,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use App\State\UserPasswordHasher;
@@ -21,9 +23,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
     operations: [
-        new GetCollection(security: "object.owner == user"),
+        new GetCollection(),
         new Post(processor: UserPasswordHasher::class, validationContext: ['groups' => ['Default', 'user:create']]),
-        new Get(security: "object.owner == user"),
+        new Get(),
         new Put(processor: UserPasswordHasher::class),
         new Patch(processor: UserPasswordHasher::class),
         new Delete(),
@@ -67,12 +69,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[SerializedName('password')]
     private ?string $plainPassword = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'userId', targetEntity: GroupMembers::class, orphanRemoval: true)]
+    private Collection $groupMembers;
+
     public function __construct()
     {
-        // @todo: prüfen ob createdAt nur einmal gesetzt wird
-        if ($this->createdAt === null) {
-            $this->createdAt = new \DateTime();
-        }
+        $this->createdAt = new \DateTime();
+        $this->groupMembers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -166,5 +172,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         $this->plainPassword = null;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, GroupMembers>
+     */
+    public function getGroupMembers(): Collection
+    {
+        return $this->groupMembers;
+    }
+
+    public function addGroupMember(GroupMembers $groupMember): static
+    {
+        if (!$this->groupMembers->contains($groupMember)) {
+            $this->groupMembers->add($groupMember);
+            $groupMember->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroupMember(GroupMembers $groupMember): static
+    {
+        if ($this->groupMembers->removeElement($groupMember)) {
+            // set the owning side to null (unless already changed)
+            if ($groupMember->getUserId() === $this) {
+                $groupMember->setUserId(null);
+            }
+        }
+
+        return $this;
     }
 }
