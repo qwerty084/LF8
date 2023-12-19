@@ -20,6 +20,12 @@ docker compose build --no-cache
 docker compose up --wait
 ```
 
+## Using prebuilt images
+
+```bash
+docker-compose -f compose.prebuild.yaml up -d
+```
+
 ## Routes
 
 -   Next.js Frontend: http://localhost:3000
