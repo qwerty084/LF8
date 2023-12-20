@@ -74,10 +74,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'userId', targetEntity: GroupMembers::class, orphanRemoval: true)]
-    #[Groups(['user','user:read'])]
-    private Collection $groupMembers;
-
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $status = null;
@@ -85,17 +81,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $bio = null;
-
+    
     #[ORM\ManyToOne(targetEntity: MediaObject::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
     #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     public ?MediaObject $image = null;
+    
+    #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'users')]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
+    private Collection $groups;
 
     public function __construct()
     {
         $this->createdAt = new \DateTime();
-        $this->groupMembers = new ArrayCollection();
+        $this->groups = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -203,36 +203,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, GroupMembers>
-     */
-    public function getGroupMembers(): Collection
-    {
-        return $this->groupMembers;
-    }
-
-    public function addGroupMember(GroupMembers $groupMember): static
-    {
-        if (!$this->groupMembers->contains($groupMember)) {
-            $this->groupMembers->add($groupMember);
-            $groupMember->setUserId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeGroupMember(GroupMembers $groupMember): static
-    {
-        if ($this->groupMembers->removeElement($groupMember)) {
-            // set the owning side to null (unless already changed)
-            if ($groupMember->getUserId() === $this) {
-                $groupMember->setUserId(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getStatus(): ?string
     {
         return $this->status;
@@ -267,5 +237,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
+    }
+
+    /**
+     * @return Collection<int, Group>
+     */
+    public function getGroups(): Collection
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(Group $group): static
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups->add($group);
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Group $group): static
+    {
+        $this->groups->removeElement($group);
+
+        return $this;
     }
 }
