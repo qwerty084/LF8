@@ -25,6 +25,7 @@ class JWTCreatedListener
         }
 
         /** @var User $user */
+        $payload["email"] = $user->getEmail();
         $payload["user"] = [
             "id" => $user->getId(),
             "username" => $user->getUsername(),

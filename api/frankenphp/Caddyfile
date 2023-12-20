@@ -51,5 +51,14 @@
 	# Disable Topics tracking if not enabled explicitly: https://github.com/jkarlin/topics
 	header ?Permissions-Policy "browsing-topics=()"
 
+	@file_server expression `(
+        {header.Accept}.matches("\\btext/html\\b")
+        && !{path}.matches("(?i)(?:^/docs|^/graphql|^/bundles/|^/media/|^/_profiler|^/_wdt|\\.(?:json|html$|csv$|ya?ml$|xml$))")
+	)`
+
+	# Comment the following line if you don't want Next.js to catch requests for HTML documents.
+	# In this case, they will be handled by the PHP app.
+
 	php_server
+
 }
