@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { emptyChat } from "../../components/loading.component";
+import { KeyObject } from "crypto";
 
 type Members = {
   id: number;
@@ -79,35 +80,47 @@ export default function Home() {
     return contact_id;
   }
 
-  function select_group() {
-    setGroupDetails({
-      id: 1,
-      name: "Group one",
-      pfp: "assets/pfp5.JPG",
-      members: [
-        { id: 1, name: "Luca Helms", pfp: "assets/pfp.JPG" },
-        { id: 2, name: "Filip", pfp: "assets/pfp5.JPG" },
-        { id: 3, name: "Hendrik", pfp: "assets/pfp6.JPG" },
-        { id: 4, name: "Jasmin", pfp: "assets/pfp4.webp" },
-      ],
-      description: "First Test Group",
-      messages: 122,
-      createdAt: "2023-12-17",
-    });
-    setIsGroup(true);
+  function select_group(id: any) {
+    if(id === groupDetails?.id) {
+        setIsGroup(null)
+        setGroupDetails(undefined)
+    } else {
+      //fetch groupchat data
+      setGroupDetails({
+        id: id,
+        name: "Group one",
+        pfp: "assets/pfp5.JPG",
+        members: [
+          { id: 1, name: "Luca Helms", pfp: "assets/pfp.JPG" },
+          { id: 2, name: "Filip", pfp: "assets/pfp5.JPG" },
+          { id: 3, name: "Hendrik", pfp: "assets/pfp6.JPG" },
+          { id: 4, name: "Jasmin", pfp: "assets/pfp4.webp" },
+        ],
+        description: "First Test Group",
+        messages: 122,
+        createdAt: "2023-12-17",
+      });
+      setIsGroup(true);
+    }
   }
 
-  function select_chat() {
-    setUserDetails({
-      id: 1,
-      name: "Filip",
-      pfp: "assets/pfp5.JPG",
-      status: "hey i use Chirp",
-      bio: "JUNGE bin ich dumm...",
-      messagescore: 12,
-      createdAt: "2023-12-17",
-    });
-    setIsGroup(false);
+  function select_chat(id: any) {
+    if(id === userDetails?.id) {
+      setIsGroup(null)
+      setUserDetails(undefined)
+    } else {
+      //fetch user data
+      setUserDetails({
+        id: 1,
+        name: "Filip",
+        pfp: "assets/pfp5.JPG",
+        status: "hey i use Chirp",
+        bio: "JUNGE bin ich dumm...",
+        messagescore: 12,
+        createdAt: "2023-12-17",
+      });
+      setIsGroup(false);
+    }
   }
 
   useEffect(() => {
@@ -120,18 +133,18 @@ export default function Home() {
         {groups.map((group: any) => (
           <div
             key={group.id}
-            onClick={select_group}
+            onClick={() => select_group(group.id)}
             className="w-full flex justify-center cursor-pointer py-1 mt-4"
           >
             <img
               src={group.pfp}
               alt={group.name}
-              className="flex items-center justify-center w-14 rounded-full transition duration-700 ease-in-out hover:rounded-2xl"
+              className="flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl"
             />
           </div>
         ))}
         <div className="flex items-end justify-center h-full mb-4">
-          settings
+          <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110"/>
         </div>
       </div>
 
@@ -139,7 +152,7 @@ export default function Home() {
         {contacts.map((contact: any) => (
           <div
             key={contact.id}
-            onClick={select_chat}
+            onClick={() => select_chat(contact.id)}
             className="flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none"
           >
             <img
@@ -157,7 +170,7 @@ export default function Home() {
         </div>
         <div
           id="userDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-2xl ${
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${
             isGroup === false ? "" : "hidden"
           }`}
         >
@@ -192,7 +205,7 @@ export default function Home() {
 
         <div
           id="groupDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-2xl ${
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${
             isGroup === true ? "" : "hidden"
           }`}
         >

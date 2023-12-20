@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { itemColor } from "../../layout";
 import { env } from "../../../env"
-import { useCreate } from "../../../components/auth.component"
+import { useCreate, session } from "../../../components/session"
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -30,7 +30,7 @@ export default function Login() {
       console.log("Unauthorized");
     } else {
       console.log("authorized")
-      useCreate(data.token);
+      useCreate.auth(data.token);
       window.location.href = "/";
     }
   }
