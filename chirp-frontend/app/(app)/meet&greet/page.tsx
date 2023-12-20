@@ -104,10 +104,12 @@ export default function MeetAndGreet() {
               className="w-1/5 p-2 focus:outline-none shadow-xl text-xl bg-transparent"
             />
           </div>
-          <iframe
-            className="w-3/5 h-1/2 rounded-xl"
-            src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=+()&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
-          ></iframe>
+          <div className="flex justify-center h-1/2">
+            <iframe
+              className="w-3/5 rounded-xl"
+              src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=+()&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+            ></iframe>
+          </div>
         </div>
       </div>
     </div>

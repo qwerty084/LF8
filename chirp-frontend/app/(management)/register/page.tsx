@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { itemColor } from "../../layout";
-import { env } from "../../../env"
+import { env } from "../../../env";
 
 export default function Registration() {
   const [email, setEmail] = useState("");
@@ -10,32 +10,29 @@ export default function Registration() {
   const [verifyPassword, setVerifyPassoword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
 
-  function handleSubmit(e:any) {
+  async function handleSubmit(e: any) {
     e.preventDefault();
-    if (password !== verifyPassword) {
-      setPasswordError(true);
+    let url = `${env.API_URL}/api/users`;
+
+    const user = {
+      email: email,
+      username: displayName,
+      password: password,
+    };
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(user),
+    });
+
+    const data = await response.json();
+    if (response.status === 201) {
+      console.log("authorized");
+      window.location.href = "/login";
     } else {
-      setPasswordError(false);
-      let url = `${env.API_URL}/api/users`
-
-      const user = {
-        "email": email,
-        "username": displayName,
-        "password": password
-      }
-
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(user)
-      })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+      console.log("Unauthorized");
     }
   }
 
@@ -84,7 +81,9 @@ export default function Registration() {
               Password
             </label>
             <input
-              className={`w-2/5 border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${passwordError ? "border-red-500" : ""}`}
+              className={`w-2/5 border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${
+                passwordError ? "border-red-500" : ""
+              }`}
               type="password"
               name="password"
               id="password"
@@ -96,7 +95,9 @@ export default function Registration() {
               Verify Password
             </label>
             <input
-              className={`w-2/5 border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${passwordError ? "border-red-500" : ""}`}
+              className={`w-2/5 border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${
+                passwordError ? "border-red-500" : ""
+              }`}
               type="password"
               name="verify_password"
               id="verify_password"
