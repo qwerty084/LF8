@@ -48,7 +48,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Assert\NotBlank]
     #[Assert\Email]
-    #[Groups(['user:read', 'user:create', 'user:update'])]
+    #[Groups(['user', 'user:read', 'user:create', 'user:update'])]
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
@@ -57,7 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     #[Assert\NotBlank]
-    #[Groups(['user:create', 'user:write', 'user:update', 'user:read'])]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $username = null;
 
     #[ORM\Column(type: "datetime", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
@@ -75,14 +75,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'userId', targetEntity: GroupMembers::class, orphanRemoval: true)]
+    #[Groups(['user','user:read'])]
     private Collection $groupMembers;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:create', 'user:write', 'user:update', 'user:read'])]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $status = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['user:create', 'user:write', 'user:update', 'user:read'])]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $bio = null;
 
     #[ORM\ManyToOne(targetEntity: MediaObject::class)]
