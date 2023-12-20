@@ -21,6 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     operations: [
@@ -31,8 +32,8 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(processor: UserPasswordHasher::class),
         new Delete(),
     ],
-    normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:create', 'user:update']],
+    normalizationContext: ['groups' => ['user']],
+    denormalizationContext: ['groups' => ['user:create', 'user:update', 'user:write']],
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -47,7 +48,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Assert\NotBlank]
     #[Assert\Email]
-    #[Groups(['user:read', 'user:create', 'user:update'])]
+    #[Groups(['user', 'user:read', 'user:create', 'user:update'])]
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
@@ -56,7 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     #[Assert\NotBlank]
-    #[Groups(['user:create', 'user:write', 'user:update', 'user:read'])]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $username = null;
 
     #[ORM\Column(type: "datetime", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
@@ -74,15 +75,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'userId', targetEntity: GroupMembers::class, orphanRemoval: true)]
+    #[Groups(['user','user:read'])]
     private Collection $groupMembers;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:create', 'user:write', 'user:update', 'user:read'])]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $status = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['user:create', 'user:write', 'user:update', 'user:read'])]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $bio = null;
+
+    #[ORM\ManyToOne(targetEntity: MediaObject::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[ApiProperty(types: ['https://schema.org/image'])]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
+    public ?MediaObject $image = null;
 
     public function __construct()
     {
