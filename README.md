@@ -45,3 +45,18 @@ docker compose -f chirp-frontend/docker-compose.yml up -d
 ## Database (ERD)
 
 ![Database](./ERD.drawio.png)
+
+
+## Building Docker images
+```bash
+cd api
+```
+
+- dev
+```bash
+docker build -t ghcr.io/qwerty084/api_dev:latest --target frankenphp_dev .
+```
+- prod
+```bash
+docker build -t ghcr.io/qwerty084/api_prod:latest --target frankenphp_prod .
+```
