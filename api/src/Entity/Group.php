@@ -21,12 +21,12 @@ class Group
     #[ORM\Column(length: 255)]
     private ?string $groupName = null;
 
-    #[ORM\OneToMany(mappedBy: 'groupId', targetEntity: GroupMembers::class, orphanRemoval: true)]
-    private Collection $groupMembers;
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'groups')]
+    private Collection $users;
 
     public function __construct()
     {
-        $this->groupMembers = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -47,30 +47,27 @@ class Group
     }
 
     /**
-     * @return Collection<int, GroupMembers>
+     * @return Collection<int, User>
      */
-    public function getGroupMembers(): Collection
+    public function getUsers(): Collection
     {
-        return $this->groupMembers;
+        return $this->users;
     }
 
-    public function addGroupMember(GroupMembers $groupMember): static
+    public function addUser(User $user): static
     {
-        if (!$this->groupMembers->contains($groupMember)) {
-            $this->groupMembers->add($groupMember);
-            $groupMember->setGroupId($this);
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addGroup($this);
         }
 
         return $this;
     }
 
-    public function removeGroupMember(GroupMembers $groupMember): static
+    public function removeUser(User $user): static
     {
-        if ($this->groupMembers->removeElement($groupMember)) {
-            // set the owning side to null (unless already changed)
-            if ($groupMember->getGroupId() === $this) {
-                $groupMember->setGroupId(null);
-            }
+        if ($this->users->removeElement($user)) {
+            $user->removeGroup($this);
         }
 
         return $this;
