@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   php:
-    image: ghcr.io/qwerty084/api:latest
+    image: ghcr.io/qwerty084/api_dev:latest
     depends_on:
       - database
     restart: unless-stopped
