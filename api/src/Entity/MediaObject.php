@@ -61,11 +61,23 @@ class MediaObject
     public ?File $file = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['media_object:read'])]
-    public ?string $filePath = null;
+    #[Groups(['media_object:read', 'user'])]
+    private ?string $filePath = null;
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setFilePath(?string $filePath): static
+    {
+        $this->filePath = $filePath;
+
+        return $this;
+    }
+
+    public function getFilePath(): ?string
+    {
+        return '/media/' . $this->filePath;
     }
 }

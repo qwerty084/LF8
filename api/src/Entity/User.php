@@ -21,6 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     operations: [
@@ -31,8 +32,8 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(processor: UserPasswordHasher::class),
         new Delete(),
     ],
-    normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:create', 'user:update']],
+    normalizationContext: ['groups' => ['user']],
+    denormalizationContext: ['groups' => ['user:create', 'user:update', 'user:write']],
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -83,6 +84,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $bio = null;
+
+    #[ORM\ManyToOne(targetEntity: MediaObject::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[ApiProperty(types: ['https://schema.org/image'])]
+    #[Groups(['user'])]
+    public ?MediaObject $image = null;
 
     public function __construct()
     {
