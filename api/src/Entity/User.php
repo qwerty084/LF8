@@ -74,7 +74,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'userId', targetEntity: GroupMembers::class, orphanRemoval: true)]
-    #[Groups(['user:read'])]
     private Collection $groupMembers;
 
     #[ORM\Column(length: 255, nullable: true)]
