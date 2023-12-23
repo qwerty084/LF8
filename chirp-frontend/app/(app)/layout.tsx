@@ -2,6 +2,7 @@
 import React from "react";
 import { bgColor, itemColor, textColor } from "../layout";
 import { useCreate, session } from "../../components/session"
+import { LoadingScreen } from "@/components/loading.component";
 
 export default function RootLayout({
   children,
@@ -15,12 +16,19 @@ export default function RootLayout({
     window.location.href = "/"
   }
 
-  const {isAuthenticated, user } = session()
+  const {isAuthenticated, user, loading } = session()
+
+  if(loading) {
+    return(
+      <div>
+        <LoadingScreen/>
+      </div>
+    )
+  }
 
   if(!isAuthenticated) {
     console.log(user)
-    return(<div>Unauthorized</div>)
-    //window.location.href = "/login"
+    window.location.href = "/login"
   } else {
 
     return (

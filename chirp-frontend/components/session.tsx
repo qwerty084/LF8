@@ -63,6 +63,7 @@ export const useCreate = {
 
 export const session = () => {
   const [user, setUser] = useState<UserType>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Check if auth cookie exists
@@ -71,13 +72,15 @@ export const session = () => {
       if (!user) {
         // If user object does not exist, create a new one
         useCreate.user(setUser);
+        setLoading(false)
       }
+      setLoading(false)
     }
   }, []);
 
   // If auth cookie exists and user object exists, return true
   const isAuthenticated = ClientCookies.get('auth') && user;
 
-  return { isAuthenticated, user };
+  return { isAuthenticated, user, loading };
 };
 

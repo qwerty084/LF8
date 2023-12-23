@@ -66,7 +66,7 @@ export default function Registration() {
                 Display Name
               </label>
               <input
-                className="w-full border shadow-sm rounded-md p-2 focus:outline-none"
+                className="w-full border shadow-sm rounded-md p-2 mb-12 focus:outline-none"
                 type="text"
                 name="display_name"
                 id="display_name"
@@ -81,7 +81,7 @@ export default function Registration() {
               Password
             </label>
             <input
-              className={`w-2/5 border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${
+              className={`w-2/5 border shadow-sm rounded-md p-2 mb-4 focus:outline-none ${
                 passwordError ? "border-red-500" : ""
               }`}
               type="password"
