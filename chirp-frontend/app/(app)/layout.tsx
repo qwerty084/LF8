@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { bgColor, itemColor, textColor } from "../layout";
-import { useCreate, session } from "../../components/session"
+import { useCreate, session } from "../../components/session.component"
 import { LoadingScreen } from "@/components/loading.component";
 
 export default function RootLayout({
@@ -67,12 +67,12 @@ export default function RootLayout({
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src="assets/my.png" className="w-16" />
+              <img src={user?.avatar} className="w-16" />
               {user?.username}
             </div>
           </div>
         </div>
-        {children}
+          {children}
       </div>
     );
   }

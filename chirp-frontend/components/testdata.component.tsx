@@ -1,14 +1,14 @@
 export const testcontacts = [
-    { id: 1, name: "Luca Helms", pfp: "assets/pfp.JPG" },
-    { id: 2, name: "Filip", pfp: "assets/pfp5.JPG" },
-    { id: 3, name: "Hendrik", pfp: "assets/pfp6.JPG" },
-    { id: 4, name: "Jasmin", pfp: "assets/pfp4.webp" },
+    { id: 1, name: "Luca Helms", avatar: "assets/pfp.JPG" },
+    { id: 2, name: "Filip", avatar: "assets/pfp5.JPG" },
+    { id: 3, name: "Hendrik", avatar: "assets/pfp6.JPG" },
+    { id: 4, name: "Jasmin", avatar: "assets/pfp4.webp" },
 ]
 
 export const testgroups = [
-    { id: 1, name: "Group 1", pfp: "assets/group_red.png" },
-    { id: 2, name: "Group 2", pfp: "assets/group_purple.png" },
-    { id: 3, name: "Group 3", pfp: "assets/group_green.png" },
+    { id: 1, name: "Group 1", avatar: "assets/group_red.png" },
+    { id: 2, name: "Group 2", avatar: "assets/group_purple.png" },
+    { id: 3, name: "Group 3", avatar: "assets/group_green.png" },
 ]
 
 export const testchat = [

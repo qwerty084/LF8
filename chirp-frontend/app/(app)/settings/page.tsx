@@ -24,8 +24,8 @@ export default function Settings() {
                     <p className="flex justify-center w-full text-xl">Settings</p>
                 </div>
                 {topics.map((item, index) => (
-                    <div key={index} className="flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none" onClick={() => setSelectedSetting(item.key)}>
-                        {item.displayName}
+                    <div key={index} className={`flex flex-row justify-between px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none ${selectedSetting === item.key ? "shadow-md" : ""}`} onClick={() => setSelectedSetting(item.key)}>
+                        {item.displayName} <p className={`mr-4  ${selectedSetting === item.key ? "" : "hidden"}`}>{'-->'}</p>
                     </div>
                 ))}
             </div>

@@ -1,30 +1,31 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { emptyChat } from "../../components/loading.component";
+import { session } from "@/components/session.component";
 import { testcontacts, testgroups, testchat } from "../../components/testdata.component"
 
 type Members = {
   id: number;
   name: string;
-  pfp: string;
+  avatar: string;
 };
 
 interface GroupType {
   id: number;
   name: string;
-  pfp: string;
+  avatar: string;
 }
 
 interface ContactType {
   id: number;
   name: string;
-  pfp: string;
+  avatar: string;
 }
 
 interface userDetails {
   id: number;
   name: string;
-  pfp: string;
+  avatar: string;
   status: string;
   bio: string;
 
@@ -36,7 +37,7 @@ interface userDetails {
 interface groupDetails {
   id: number;
   name: string;
-  pfp: string;
+  avatar: string;
   members: Members[];
   description: string;
 
@@ -54,6 +55,7 @@ export default function Home() {
 
   const [groups, setGroups] = useState<GroupType[]>([]);
   const [contacts, setContacts] = useState<ContactType[]>([]);
+  const { user } = session()
 
   const [chat, setChat] = useState<chatType[] | null>();
   const [message, setMessage] = useState<string>("")
@@ -64,7 +66,7 @@ export default function Home() {
   const defaultUser = {
     id: 0,
     name: "",
-    pfp: "",
+    avatar: "",
     status: "",
     bio: "",
     messagescore: 0,
@@ -74,7 +76,7 @@ export default function Home() {
   const defaultGroup = {
     id: 0,
     name: "",
-    pfp: "",
+    avatar: "",
     members: [],
     description: "",
     messages: 0,
@@ -95,12 +97,12 @@ export default function Home() {
       setGroupDetails({
         id: id,
         name: "Group one",
-        pfp: "assets/pfp5.JPG",
+        avatar: "assets/pfp5.JPG",
         members: [
-          { id: 1, name: "Luca Helms", pfp: "assets/pfp.JPG" },
-          { id: 2, name: "Filip", pfp: "assets/pfp5.JPG" },
-          { id: 3, name: "Hendrik", pfp: "assets/pfp6.JPG" },
-          { id: 4, name: "Jasmin", pfp: "assets/pfp4.webp" },
+          { id: 1, name: "Luca Helms", avatar: "assets/pfp.JPG" },
+          { id: 2, name: "Filip", avatar: "assets/pfp5.JPG" },
+          { id: 3, name: "Hendrik", avatar: "assets/pfp6.JPG" },
+          { id: 4, name: "Jasmin", avatar: "assets/pfp4.webp" },
         ],
         description: "First Test Group",
         messages: 122,
@@ -120,7 +122,7 @@ export default function Home() {
       setUserDetails({
         id: 1,
         name: "Filip",
-        pfp: "assets/pfp5.JPG",
+        avatar: "assets/pfp5.JPG",
         status: "hey i use Chirp",
         bio: "JUNGE bin ich dumm...",
         messagescore: 12,
@@ -132,8 +134,31 @@ export default function Home() {
   }
   {/* Use senderId only for local messages. the backend should get the sender id of an verifyed JWT to secure the right id */ }
   function send_message(senderId: number, message: string) {
+    // Create a new message object
+    const newMessage = {
+      senderId: senderId,
+      message: message
+    };
 
+    // Add the new message to the chat
+    setChat(prevChat => prevChat ? [...prevChat, newMessage] : [newMessage]);
+    setMessage("")
   }
+
+  function handleKeyPress(event: React.KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevents the addition of a new line in the text field (optional)
+      userDetails && userDetails.id && send_message(userDetails.id, message);
+    }
+  }
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(scrollToBottom, [chat]);
 
   useEffect(() => {
     get_groups_and_chats();
@@ -141,6 +166,7 @@ export default function Home() {
 
   return (
     <div id="body" className="flex flex-row flex-grow">
+      {/* Group Map Function */}
       <div className="flex flex-col w-24 h-full shadow-custom">
         {groups.map((group: any) => (
           <div
@@ -149,17 +175,17 @@ export default function Home() {
             className="w-full flex justify-center cursor-pointer py-1 mt-4"
           >
             <img
-              src={group.pfp}
+              src={group.avatar}
               alt={group.name}
               className="flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl"
             />
           </div>
         ))}
         <div className="flex items-end justify-center h-full mb-4">
-          <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110" onClick={() => window.location.href = "/settings"}/>
+          <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110" onClick={() => window.location.href = "/settings"} />
         </div>
       </div>
-
+      {/* Contact Map Function */}
       <div className="flex flex-col justify-items-start w-1/6">
         {contacts.map((contact: any) => (
           <div
@@ -168,7 +194,7 @@ export default function Home() {
             className="flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none"
           >
             <img
-              src={contact.pfp}
+              src={contact.avatar}
               className="flex items-center w-14 rounded-full"
             />
             <p className="flex items-center text-xl">{contact.name}</p>
@@ -177,21 +203,24 @@ export default function Home() {
       </div>
       {/* Chat div with input controls */}
       <div className="flex flex-grow justify-between shadow-custom">
-        <div id="chat" className="flex flex-col justify-end p-4 mx-4 w-full h-full">
-          {!chat ? emptyChat() : chat?.map((item, index) => (
-            <div key={index} className={`flex ${item.senderId === userDetails?.id ? 'justify-end' : 'justify-start'}`}>
-              <p className="text-xl">{item.message}</p>
-            </div>
-          ))}
-          <div className={`flex rounded-md mt-12 gap-4 ${!chat ? "hidden": ""}`}>
+        <div className="flex flex-col w-[100%] h-[100%] mx-4">
+          <div id="chatMessages" className="h-[80vh] overflow-y-auto scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-100">
+            {!chat ? emptyChat() : chat?.map((item, index) => (
+              item.senderId === user?.id ?
+                <div className="flex justify-end items-center mt-2">{item.message}<img src={user.avatar} alt="" className="rounded-full ml-2 w-10" /></div>
+                :
+                <div className="flex justify-start items-center mt-2"><img src={userDetails?.avatar} alt="" className="rounded-full mr-2 w-10" />{item.message}</div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <div id="controlls" className={`flex rounded-md mt-8 mb-4 gap-4 ${!chat ? "hidden" : ""}`}>
             <label htmlFor="upload" className="flex items-center justify-center text-5xl transition duration-300 cursor-pointer hover:scale-110">
               +
             </label>
             <input type="file" name="upload" id="upload" className="hidden" />
-            <input type="text" className="w-full pl-2 text-md rounded-md bg-transparent shadow-custom focus:outline-none" placeholder="Enter your Message" value={message} onChange={(e) => setMessage(e.target.value)} />
-            <img src="assets/send.png" id="send" className="w-10 h-10 text-xl" onClick={() => userDetails && userDetails.id && send_message(userDetails.id, message)}/>
+            <input type="text" className="w-full pl-2 text-md rounded-md bg-transparent shadow-custom focus:outline-none" placeholder="Enter your Message" value={message} onChange={(e) => setMessage(e.target.value)} onKeyPress={handleKeyPress} />
+            <img src="assets/send.png" id="send" className="w-10 h-10 text-xl cursor-pointer" onClick={() => user && user.id && send_message(user?.id, message)} />
           </div>
-
         </div>
         <div
           id="userDetails"
@@ -203,7 +232,7 @@ export default function Home() {
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src={userDetails?.pfp} className="w-16 rounded-full" />
+              <img src={userDetails?.avatar} className="w-16 rounded-full" />
               {userDetails?.name}
             </div>
           </div>
@@ -248,7 +277,7 @@ export default function Home() {
                 id="groupMembers"
                 className="flex flex-row items-center gap-2 mb-2 text-md font-semibold"
               >
-                <img src={member.pfp} className="w-10 rounded-full" />
+                <img src={member.avatar} className="w-10 rounded-full" />
                 {member.name}
               </div>
             ))}
@@ -270,6 +299,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

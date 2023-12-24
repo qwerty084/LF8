@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { itemColor } from "../../layout";
 import { env } from "../../../env"
-import { useCreate, session } from "../../../components/session"
+import { useCreate, session } from "../../../components/session.component"
 
 export default function Login() {
   const [email, setEmail] = useState("");
