@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { emptyChat } from "../../components/loading.component";
-import { KeyObject } from "crypto";
+import { testcontacts, testgroups, testchat } from "../../components/testdata.component"
 
 type Members = {
   id: number;
@@ -45,45 +45,51 @@ interface groupDetails {
   createdAt: string;
 }
 
-interface nullable {
-  value: boolean | null;
-}
-
 interface chatType {
-  messages: [];
+  senderId: number;
+  message: string;
 }
 
 export default function Home() {
+
   const [groups, setGroups] = useState<GroupType[]>([]);
   const [contacts, setContacts] = useState<ContactType[]>([]);
 
-  const [chat, setChat] = useState<chatType | null>();
+  const [chat, setChat] = useState<chatType[] | null>();
+  const [message, setMessage] = useState<string>("")
   const [isGroup, setIsGroup] = useState<boolean | null>(null);
   const [userDetails, setUserDetails] = useState<userDetails>();
   const [groupDetails, setGroupDetails] = useState<groupDetails>();
 
-  function get_groups_and_chats() {
-    setGroups([
-      { id: 1, name: "Group 1", pfp: "assets/group_red.png" },
-      { id: 2, name: "Group 2", pfp: "assets/group_purple.png" },
-      { id: 3, name: "Group 3", pfp: "assets/group_green.png" },
-    ]);
-    setContacts([
-      { id: 1, name: "Luca Helms", pfp: "assets/pfp.JPG" },
-      { id: 2, name: "Filip", pfp: "assets/pfp5.JPG" },
-      { id: 3, name: "Hendrik", pfp: "assets/pfp6.JPG" },
-      { id: 4, name: "Jasmin", pfp: "assets/pfp4.webp" },
-    ]);
+  const defaultUser = {
+    id: 0,
+    name: "",
+    pfp: "",
+    status: "",
+    bio: "",
+    messagescore: 0,
+    createdAt: "",
   }
 
-  function get_chat(contact_id: number) {
-    return contact_id;
+  const defaultGroup = {
+    id: 0,
+    name: "",
+    pfp: "",
+    members: [],
+    description: "",
+    messages: 0,
+    createdAt: "",
+  }
+
+  function get_groups_and_chats() {
+    setGroups(testgroups);
+    setContacts(testcontacts);
   }
 
   function select_group(id: any) {
-    if(id === groupDetails?.id) {
-        setIsGroup(null)
-        setGroupDetails(undefined)
+    if (id === groupDetails?.id) {
+      setIsGroup(null)
+      setGroupDetails(defaultGroup)
     } else {
       //fetch groupchat data
       setGroupDetails({
@@ -105,9 +111,10 @@ export default function Home() {
   }
 
   function select_chat(id: any) {
-    if(id === userDetails?.id) {
+    if (id === userDetails?.id) {
       setIsGroup(null)
-      setUserDetails(undefined)
+      setChat(null)
+      setUserDetails(defaultUser)
     } else {
       //fetch user data
       setUserDetails({
@@ -120,7 +127,12 @@ export default function Home() {
         createdAt: "2023-12-17",
       });
       setIsGroup(false);
+      setChat(testchat);
     }
+  }
+  {/* Use senderId only for local messages. the backend should get the sender id of an verifyed JWT to secure the right id */ }
+  function send_message(senderId: number, message: string) {
+
   }
 
   useEffect(() => {
@@ -144,7 +156,7 @@ export default function Home() {
           </div>
         ))}
         <div className="flex items-end justify-center h-full mb-4">
-          <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110"/>
+          <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110" onClick={() => window.location.href = "/settings"}/>
         </div>
       </div>
 
@@ -163,16 +175,28 @@ export default function Home() {
           </div>
         ))}
       </div>
-
+      {/* Chat div with input controls */}
       <div className="flex flex-grow justify-between shadow-custom">
-        <div id="chat" className="p-4 w-full">
-          {chat ? "chat" : emptyChat()}
+        <div id="chat" className="flex flex-col justify-end p-4 mx-4 w-full h-full">
+          {!chat ? emptyChat() : chat?.map((item, index) => (
+            <div key={index} className={`flex ${item.senderId === userDetails?.id ? 'justify-end' : 'justify-start'}`}>
+              <p className="text-xl">{item.message}</p>
+            </div>
+          ))}
+          <div className={`flex rounded-md mt-12 gap-4 ${!chat ? "hidden": ""}`}>
+            <label htmlFor="upload" className="flex items-center justify-center text-5xl transition duration-300 cursor-pointer hover:scale-110">
+              +
+            </label>
+            <input type="file" name="upload" id="upload" className="hidden" />
+            <input type="text" className="w-full pl-2 text-md rounded-md bg-transparent shadow-custom focus:outline-none" placeholder="Enter your Message" value={message} onChange={(e) => setMessage(e.target.value)} />
+            <img src="assets/send.png" id="send" className="w-10 h-10 text-xl" onClick={() => userDetails && userDetails.id && send_message(userDetails.id, message)}/>
+          </div>
+
         </div>
         <div
           id="userDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${
-            isGroup === false ? "" : "hidden"
-          }`}
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${isGroup === false ? "" : "hidden"
+            }`}
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
             <div
@@ -205,9 +229,8 @@ export default function Home() {
 
         <div
           id="groupDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${
-            isGroup === true ? "" : "hidden"
-          }`}
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${isGroup === true ? "" : "hidden"
+            }`}
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
             <div

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { testmeets } from "@/components/testdata.component";
 
 interface MeetingType {
   id: number;
@@ -24,32 +25,7 @@ export default function MeetAndGreet() {
   const [meeting, setMeeting] = useState<MeetingType>(defaultMeet);
   const [createMeet, setCreateMeet] = useState<boolean | null>(null)
   function get_meets() {
-    setMeetings([
-      {
-        id: 1,
-        name: "first meeting",
-        description: "test",
-        participants: [1, 2, 3],
-        adress: "123-123",
-        datetime: "2023-12-18",
-      },
-      {
-        id: 2,
-        name: "second meeting",
-        description: "test",
-        participants: [1, 2, 3],
-        adress: "123-123",
-        datetime: "2023-12-18",
-      },
-      {
-        id: 3,
-        name: "third meeting",
-        description: "test",
-        participants: [1, 2, 3],
-        adress: "123-123",
-        datetime: "2023-12-18",
-      },
-    ]);
+    setMeetings(testmeets);
   }
 
   function select_meet(id: number) {
@@ -79,6 +55,21 @@ export default function MeetAndGreet() {
     }
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof MeetingType) => {
+    if (field === 'participants') {
+      const participantIds = e.target.value.split(',').map(Number);
+      setMeeting({
+        ...meeting,
+        [field]: participantIds,
+      });
+    } else {
+      setMeeting({
+        ...meeting,
+        [field]: e.target.value,
+      });
+    }
+  };
+
   useEffect(() => {
     get_meets();
   }, []);
@@ -87,7 +78,7 @@ export default function MeetAndGreet() {
     <div id="body" className="flex flex-row flex-grow">
       <div className="flex flex-col w-24 h-full shadow-custom">
         <div className="flex items-end justify-center h-full mb-4">
-          settings
+          <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110" onClick={() => window.location.href = "/settings"}/>
         </div>
       </div>
 
@@ -126,46 +117,25 @@ export default function MeetAndGreet() {
 
           <div id="meet_name" className="flex flex-col mb-4">
             <span className="font-semibold">Meet Name</span>
-            <input
-              type="text"
-              placeholder="Meet Name"
-              className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent"
-            />
+            <input type="text" placeholder="Meeting Name" className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.name} onChange={(e) => handleInputChange(e, 'name')} />
           </div>
 
           <div id="meet_description" className="flex flex-col mb-4">
             <span className="font-semibold">Description</span>
-            <input
-              type="text"
-              placeholder="Description"
-              className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent"
-            />
+            <input type="text" placeholder="Description" className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.description} onChange={(e) => handleInputChange(e, 'description')} />
           </div>
           <div id="meet_participants" className="flex flex-col mb-4">
-            <span className="font-semibold"></span>
-            <input
-              type="text"
-              placeholder="Participants"
-              className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent"
-            />
+            <span className="font-semibold">Participants</span>
+            <input type="number" placeholder="" className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.participants.join(',')} onChange={(e) => handleInputChange(e, 'participants')} />
           </div>
           <div id="meet_adress" className="flex flex-col mb-4">
             <span className="font-semibold">Adress to Meet</span>
-            <input
-              type="text"
-              placeholder="Meet-Street 123 a"
-              className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent"
-            />
+            <input type="text" placeholder={new Date().toISOString().slice(0, 10)} className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.adress} onChange={(e) => handleInputChange(e, 'adress')} />
           </div>
           <div id="meet_datetime" className="flex flex-col mb-4">
             <span className="font-semibold">Date and Time</span>
-            <input
-              type="datetime-local"
-              placeholder="Date and Time"
-              className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent"
-            />
+            <input type="text" placeholder="" className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.datetime} onChange={(e) => handleInputChange(e, 'datetime')} />
           </div>
-
         </div>
 
         <div
