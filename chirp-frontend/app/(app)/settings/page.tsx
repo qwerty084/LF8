@@ -13,6 +13,8 @@ export default function Settings() {
     ]
     const [selectedSetting, setSelectedSetting] = useState("account")
 
+    const [showForm, setShowForm] = useState(false)
+
     return (
         <div id="body" className="flex flex-row flex-grow">
             <div className="flex flex-col w-24 h-full shadow-custom">
