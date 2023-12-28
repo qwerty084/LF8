@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
 import { session } from "@/components/session.component";
-import { textaccent } from "@/app/layout";
+import { textColor, textaccent } from "@/app/layout";
 import { env } from "@/env";
 import Cookies from "js-cookie";
 import { JwtPayload, jwtDecode } from "jwt-decode";
@@ -153,7 +153,7 @@ export function AccountFunc() {
                 body: JSON.stringify(request_data),
             });
             const data = await response.json();
-            if (response.status === 200){
+            if (response.status === 200) {
                 setSaving(false);
             } else {
                 console.log(data)
@@ -176,10 +176,16 @@ export function AccountFunc() {
                 <div className="flex flex-col gap-2 mb-4">
                     <div className="flex">
                         <input type="text" className="bg-transparent p-2 w-2/5 mr-2 rounded-md shadow-custom focus:outline-none flex-shrink-0" placeholder="Display Name" readOnly={readOnly} value={username} onChange={(e) => setUserName(e.target.value)} />
-                        <input type="text" className="bg-transparent p-2 rounded-md shadow-custom focus:outline-none flex-grow" placeholder="email" readOnly={readOnly} value={email} />
+                        <input type="text" className="bg-transparent p-2 rounded-md shadow-custom focus:outline-none flex-grow" placeholder="email" readOnly={readOnly} value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
-                    <input type="text" className="bg-transparent p-2 w-2/5 rounded-md shadow-custom focus:outline-none" placeholder="status" readOnly={readOnly} value={status || ""} />
-                    <textarea className="bg-transparent p-2 h-20 rounded-md shadow-custom focus:outline-none" placeholder="Bio" readOnly={readOnly} value={bio || ""}></textarea>
+                    <input type="text" className="bg-transparent p-2 w-2/5 rounded-md shadow-custom focus:outline-none" placeholder="status" readOnly={readOnly} value={status || ""} onChange={(e) => setStatus(e.target.value)} />
+                    <div className="flex flex-row w-full gap-2">
+                        <textarea className="bg-transparent w-2/5 p-2 h-21 rounded-md shadow-custom focus:outline-none resize-none" placeholder="Bio" readOnly={readOnly} value={bio || ""} onChange={(e) => setBio(e.target.value)}></textarea>
+                        <div className="p-2 shadow-custom rounded-md">
+                            <p className="mb-2">Upload a Avatar for your Profile</p>
+                            <input type="file" className={`block w-full text-sm ${textColor} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:${textColor} file:bg-transparent file:shadow-custom file:font-semibold ${readOnly ? "" : "file:cursor-pointer"}`} readOnly={readOnly} disabled={readOnly} />
+                        </div>
+                    </div>
                 </div>
                 <button className="bg-transparent p-2 rounded-md shadow-custom hover:scale-105" onClick={() => logout()}>Logout</button>
             </div>
@@ -306,19 +312,19 @@ export function HelpSupportFunc() {
 
     return (
         <div onClick={() => setShowForm(false)}>
-        <form id="form" className={`flex flex-col mt-4  w-[50%] ${showForm ? "" : "hidden"}`} onSubmit={handleReport} onClick={(e) => e.stopPropagation()}>
-            <p className={`text-sm ${textaccent} mb-4`}>! Reports are submitted as an issue by default if something important broke please select "Report as a Bug"</p>
-            <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={title} onChange={(e) => setTitle(e.target.value)} name="title" id="title" placeholder="Enter a Title" />
-            <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={description} onChange={(e) => setDescription(e.target.value)} name="description" id="description" placeholder="Describe the issue or bug" />
-            <div className="flex gap-4 mb-2">
-                {env.GIT_LABELS.map((item, index) => (
-                    <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${label === item ? "" : "hover:scale-105"} ${label === item ? textaccent : ""}`} disabled={label === item} onClick={() => setLabel(item)}>{item}</button>
-                ))}
-            </div>
-            <button type="submit" className="p-2 rounded-md shadow-custom">Report your {label}</button>
-        </form>
-        <button className={`p-2 rounded-md shadow-custom ${showForm ? "hidden" : ""}`} onClick={(e) => { e.stopPropagation(); setShowForm(true); }}>Report a problem</button>
-    </div>
+            <form id="form" className={`flex flex-col mt-4  w-[50%] ${showForm ? "" : "hidden"}`} onSubmit={handleReport} onClick={(e) => e.stopPropagation()}>
+                <p className={`text-sm ${textaccent} mb-4`}>! Reports are submitted as an issue by default if something important broke please select "Report as a Bug"</p>
+                <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={title} onChange={(e) => setTitle(e.target.value)} name="title" id="title" placeholder="Enter a Title" />
+                <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={description} onChange={(e) => setDescription(e.target.value)} name="description" id="description" placeholder="Describe the issue or bug" />
+                <div className="flex gap-4 mb-2">
+                    {env.GIT_LABELS.map((item, index) => (
+                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${label === item ? "" : "hover:scale-105"} ${label === item ? textaccent : ""}`} disabled={label === item} onClick={() => setLabel(item)}>{item}</button>
+                    ))}
+                </div>
+                <button type="submit" className="p-2 rounded-md shadow-custom">Report your {label}</button>
+            </form>
+            <button className={`p-2 rounded-md shadow-custom ${showForm ? "hidden" : ""}`} onClick={(e) => { e.stopPropagation(); setShowForm(true); }}>Report a problem</button>
+        </div>
 
     )
 }

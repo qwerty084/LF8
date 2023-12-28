@@ -19,7 +19,7 @@ export default function Password() {
       
 return(
     <div className="flex h-full w-full justify-center items-center">
-      <div className={`w-1/5 md:2/5 sm:3/5 p-8 rounded-3xl ${itemColor}`}>
+      <div className={`w-1/5 md:2/5 sm:3/5 p-8 rounded-3xl shadow-custom`}>
         <h1 className="flex text-2xl justify-center font-bold">
           Chirp Messenger
         </h1>
@@ -30,7 +30,7 @@ return(
               Password
             </label>
             <input
-            className={`w-full border shadow-sm rounded-md p-2 mb-2 focus:outline-none ${passwordError ? "border-red-500" : ""}`}
+            className={`w-full bg-transparent shadow-custom rounded-md p-2 mb-2 focus:outline-none ${passwordError ? "border-red-500" : ""}`}
               type="password"
               name="password"
               id="password"
@@ -42,7 +42,7 @@ return(
               Verify Password
             </label>
             <input
-              className={`w-full border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${passwordError ? "border-red-500" : ""}`}
+              className={`w-full bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${passwordError ? "border-red-500" : ""}`}
               type="password"
               name="verify_password"
               id="verify_password"
@@ -52,7 +52,7 @@ return(
             />
           </div>
           <button
-            className="w-full bg-blue-500 hover:bg-[#034d61] text-white p-3 rounded-md "
+            className="w-full bg-transparent shadow-custom hover:shadow-none hover:bg-[#034d61] text-white p-3 rounded-md"
             type="submit"
           >
             Reset Password

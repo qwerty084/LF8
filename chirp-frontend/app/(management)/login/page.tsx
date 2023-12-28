@@ -37,7 +37,7 @@ export default function Login() {
 
   return (
     <div className="flex h-full w-full justify-center items-center">
-      <div className={`w-1/5 md:2/5 sm:3/5 p-8 rounded-3xl ${itemColor}`}>
+      <div className={`w-1/5 md:2/5 sm:3/5 p-8 rounded-3xl shadow-custom`}>
         <h1 className="flex text-2xl justify-center font-bold">
           Chirp Messenger
         </h1>
@@ -48,7 +48,7 @@ export default function Login() {
               Email
             </label>
             <input
-              className={`w-full border shadow-sm rounded-md p-2 focus:outline-none ${loginError ? "border-red-500" : ""}`}
+              className={`w-full bg-transparent shadow-custom rounded-md p-2 focus:outline-none ${loginError ? "border-red-500" : ""}`}
               type="email"
               name="email"
               id="email"
@@ -62,7 +62,7 @@ export default function Login() {
               Password
             </label>
             <input
-              className={`w-full border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${loginError ? "border-red-500" : ""}`}
+              className={`w-full bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${loginError ? "border-red-500" : ""}`}
               type="password"
               name="password"
               id="password"
