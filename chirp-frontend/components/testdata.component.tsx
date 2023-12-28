@@ -21,12 +21,12 @@ export const testchat = [
         message: "Naa was geht"
     },
     {
-        senderId: 1,
+        senderId: 3,
         message: "Nischt"
     },
     {
-        senderId: 2,
-        message: "Naa was geht"
+        senderId: 4,
+        message: "Garnichts"
     },
     {
         senderId: 1,

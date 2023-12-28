@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { getPage } from "@/components/settings.component"
+import Cookies from "js-cookie"
 
 export default function Settings() {
     const topics = [
@@ -14,6 +15,11 @@ export default function Settings() {
     const [selectedSetting, setSelectedSetting] = useState("account")
 
     const [showForm, setShowForm] = useState(false)
+
+    function logout() {
+        Cookies.remove("auth")
+        window.location.href = "/login"
+    }
 
     return (
         <div id="body" className="flex flex-row flex-grow">
@@ -30,6 +36,9 @@ export default function Settings() {
                         {item.displayName} <p className={`mr-4  ${selectedSetting === item.key ? "" : "hidden"}`}>{'-->'}</p>
                     </div>
                 ))}
+                <div className={`flex flex-row justify-between px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none`} onClick={() => logout()}>
+                        Logout
+                    </div>
             </div>
             <div className="flex flex-grow justify-between shadow-custom">
                 <div id="settings-body" className="p-4 w-full">

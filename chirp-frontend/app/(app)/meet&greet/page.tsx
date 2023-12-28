@@ -78,7 +78,7 @@ export default function MeetAndGreet() {
     <div id="body" className="flex flex-row flex-grow">
       <div className="flex flex-col w-24 h-full shadow-custom">
         <div className="flex items-end justify-center h-full mb-4">
-          <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110" onClick={() => window.location.href = "/settings"}/>
+          <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110" onClick={() => window.location.href = "/settings"} />
         </div>
       </div>
 
@@ -107,7 +107,6 @@ export default function MeetAndGreet() {
             ></iframe>
           </div>
         </div>
-
 
         <div
           id="createMeet"

@@ -30,10 +30,9 @@ export default function RootLayout({
   }
 
   if (!isAuthenticated) {
-    console.log(user)
     window.location.href = "/login"
   } else {
-
+    console.log(user)
     return (
       <div className={`flex flex-col h-screen w-screen ${bgColor} ${textColor}`}>
         <div id="header" className="flex flex-row w-full">
@@ -67,8 +66,8 @@ export default function RootLayout({
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src={user?.avatar} className="w-16" />
-              {user?.username}
+              <img src={user?.avatar} className="w-16 cursor-pointer" onClick={() => window.location.href = "/settings"}/>
+              <p className="cursor-pointer" onClick={() => window.location.href = "/settings"}>{user?.username}</p>
             </div>
           </div>
         </div>

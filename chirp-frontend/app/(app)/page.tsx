@@ -91,6 +91,7 @@ export default function Home() {
   function select_group(id: any) {
     if (id === groupDetails?.id) {
       setIsGroup(null)
+      setChat(null)
       setGroupDetails(defaultGroup)
     } else {
       //fetch groupchat data
@@ -109,6 +110,7 @@ export default function Home() {
         createdAt: "2023-12-17",
       });
       setIsGroup(true);
+      setChat(testchat);
     }
   }
 
@@ -207,9 +209,9 @@ export default function Home() {
           <div id="chatMessages" className="h-[80vh] overflow-y-auto scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-100">
             {!chat ? emptyChat() : chat?.map((item, index) => (
               item.senderId === user?.id ?
-                <div className="flex justify-end items-center mt-2">{item.message}<img src={user.avatar} alt="" className="rounded-full ml-2 w-10" /></div>
+                <div key={index} className="flex justify-end items-center mt-2">{item.message}<img src={user.avatar} alt="" className="rounded-full ml-2 w-10" /></div>
                 :
-                <div className="flex justify-start items-center mt-2"><img src={userDetails?.avatar} alt="" className="rounded-full mr-2 w-10" />{item.message}</div>
+                <div key={index} className="flex justify-start items-center mt-2"><img src={isGroup ?  groupDetails?.members.find(member => member.id === item.senderId)?.avatar : userDetails?.avatar} alt="" className="rounded-full mr-2 w-10" />{item.message}</div>
             ))}
             <div ref={messagesEndRef} />
           </div>
@@ -224,7 +226,7 @@ export default function Home() {
         </div>
         <div
           id="userDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${isGroup === false ? "" : "hidden"
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${user?.config.chatDetails === true && isGroup === false ? "" : "hidden"
             }`}
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
@@ -258,7 +260,7 @@ export default function Home() {
 
         <div
           id="groupDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${isGroup === true ? "" : "hidden"
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${user?.config.chatDetails && isGroup === true ? "" : "hidden"
             }`}
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
@@ -272,8 +274,9 @@ export default function Home() {
 
           <div id="members" className="flex flex-col mb-4">
             <span className="font-semibold">Members: </span>
-            {groupDetails?.members.map((member: any) => (
+            {groupDetails?.members.map((member: any, index) => (
               <div
+                key={index}
                 id="groupMembers"
                 className="flex flex-row items-center gap-2 mb-2 text-md font-semibold"
               >

@@ -13,6 +13,12 @@ interface UserJwtPayload extends JwtPayload {
     bio: string | null,
     ip: string,
     avatar: string,
+    config: {
+      theme: string,
+      chatDetails: boolean,
+      chatSecurity: number,
+      meetSecurity: number,
+    }
   }
 }
 
@@ -24,6 +30,12 @@ interface UserType {
   bio: string | null,
   ip: string,
   avatar: string,
+  config: {
+    theme: string,
+    chatDetails: boolean,
+    chatSecurity: number,
+    meetSecurity: number,
+  }
 }
 
 export const useCreate = {
@@ -44,18 +56,21 @@ export const useCreate = {
     if (!jwt) {
       return { status: 401, message: 'Unauthorized' };
     }
-
     try {
       // Decode the payload
       const payload = jwtDecode<UserJwtPayload>(jwt);
 
-      // Add the avatar to the user object
+      // Add currently static properties to the user object
       payload.user.avatar = "assets/my.png";
-
+      payload.user.config = {
+        theme: "dark",
+        chatDetails: true,
+        chatSecurity: 1,
+        meetSecurity: 1,
+      }
+      
       // Fill it into the user const
       setUser(payload.user);
-
-      console.log("user object created", payload.user);
 
       // After a success, return status code 200 and success as a message
       return { status: 200, message: 'Success', user: payload.user };
@@ -72,8 +87,10 @@ export const session = () => {
 
   useEffect(() => {
     // Check if auth cookie exists
+    console.log("coockie check")
     if (ClientCookies.get('auth')) {
       // Check if user object exists
+      console.log("user object check")
       if (!user) {
         // If user object does not exist, create a new one
         useCreate.user(setUser);
@@ -81,6 +98,7 @@ export const session = () => {
       }
       setLoading(false)
     }
+    setLoading(false)
   }, []);
 
   // If auth cookie exists and user object exists, return true

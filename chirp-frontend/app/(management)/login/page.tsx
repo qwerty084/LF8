@@ -11,7 +11,7 @@ export default function Login() {
 
   async function handleSubmit(e: any) {
     e.preventDefault();
-    let url = `${env.API_URL}/api/auth`
+    let url = `${env.API_URL}/auth`
 
     const user = {
       "email": email,

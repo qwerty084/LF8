@@ -1,7 +1,10 @@
 "use client"
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { session } from "@/components/session.component";
 import { textaccent } from "@/app/layout";
 import { env } from "@/env";
+import Cookies from "js-cookie";
+import { JwtPayload, jwtDecode } from "jwt-decode";
 
 type SettingPageType = {
     account: () => JSX.Element;
@@ -56,20 +59,7 @@ export const settingPage: SettingPageType = {
         return (
             <div>
                 <h1 className="text-2xl mb-8">Data & Storage</h1>
-                <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                    <p className="text-xl">Data usage</p>
-                </div>
-                <div id="clearCache" className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                    <p className="text-xl">Clear cache</p>
-                    <p className={`${textaccent} mb-2`}>Clearing the cache clears all data stored in your browser associated with our CHIRP <br /> service, including that we log you out.</p>
-                    <p className={`${textaccent} font-semibold`}>In this process we will clear:</p>
-                    <ul className={`${textaccent} mb-4`}>
-                        <li>- chaches</li>
-                        <li>- cookies</li>
-                        <li>- session Storage</li>
-                    </ul>
-                    <button className="p-2 rounded-md shadow-custom">Clear Cache</button>
-                </div>
+                <DataStorageFunc />
             </div>
         )
     },
@@ -89,7 +79,7 @@ export const settingPage: SettingPageType = {
                 </div>
             </div>
         )
-    }
+    },
 }
 
 export function getPage(key: string): () => JSX.Element {
@@ -101,50 +91,128 @@ export function getPage(key: string): () => JSX.Element {
     }
 }
 
-export function HelpSupportFunc() {
-    const [showForm, setShowForm] = useState(false)
-    const [label, setLabel] = useState("issue")
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
+export function AccountFunc() {
 
-    function handleReport() {
-        fetch('https://api.github.com/repos/qwerty084/LF8/issues', {
-            method: 'POST',
-            headers: {
-                'Authorization': `${env.GIT_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-                title: 'title',
-                body: 'Issue description',
-                labels: label
-            })
-        })
-            .then(response => response.json())
-            .then(data => console.log(data))
+    interface UserJwtPayload extends JwtPayload {
+        iat: number,
+        exp: number,
+        user: {
+            id: number,
+            username: string,
+            email: string,
+            status: string | null,
+            bio: string | null,
+            ip: string,
+            avatar: string,
+        }
+    }
+
+    const [readOnly, setReadOnly] = useState(true)
+    const [saving, setSaving] = useState(false)
+
+
+    const accountdata = getaccountdata();
+
+    const [username, setUserName] = useState<string | undefined>(accountdata?.user.username)
+    const [email, setEmail] = useState<string | undefined>(accountdata?.user.email)
+    const [status, setStatus] = useState<string | undefined>(accountdata?.user.status || undefined)
+    const [bio, setBio] = useState<string | undefined>(accountdata?.user.bio || undefined)
+
+    function getaccountdata() {
+        const jwt = Cookies.get("auth");
+
+        if (!jwt) {
+            return null;
+        }
+
+        const payload = jwtDecode<UserJwtPayload>(jwt);
+
+        return payload;
+    }
+
+    async function handleClick() {
+        let url = `${env.API_URL}/users/${accountdata?.user.id}`;
+        if (readOnly) {
+            setReadOnly(false)
+        } else {
+            setSaving(true);
+            setReadOnly(true);
+            const request_data = {
+                username: username,
+                email: email,
+                status: status,
+                bio: bio,
+            }
+            const response = await fetch(url, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/merge-patch+json",
+
+                    Authorization: `Bearer ${Cookies.get("auth")}`,
+                },
+                body: JSON.stringify(request_data),
+            });
+            const data = await response.json();
+            if (response.status === 200){
+                setSaving(false);
+            } else {
+                console.log(data)
+            }
+        }
+    }
+
+    function logout() {
+        Cookies.remove("auth")
+        window.location.href = "/login"
     }
 
     return (
         <div>
-            <form id="form" className={`flex flex-col mt-4  w-[50%] ${showForm ? "" : "hidden"}`} onSubmit={handleReport}>
-                <p className={`text-sm ${textaccent} mb-4`}>! Reports are submitted as an issue by default if something important broke please select "Report as a Bug"</p>
-                <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={title} onChange={(e) => setTitle(e.target.value)} name="title" id="title" placeholder="Enter a Title" />
-                <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={description} onChange={(e) => setDescription(e.target.value)} name="description" id="description" placeholder="Describe the issue or bug" />
-                <div className="flex gap-4 mb-2">
-                    {env.GIT_LABELS.map((item, index) => (
-                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${label === item ? "" : "hover:scale-105"} ${label === item ? textaccent : ""}`} disabled={label === item} onClick={() => setLabel(item)}>{item}</button>
-                    ))}
+            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
+                <div className="flex justify-between">
+                    <p className="text-xl mb-2">Account Informations</p>
+                    <img src={saving ? "assets/save-disabled.png" : readOnly ? "assets/edit.png" : "assets/save.png"} alt="" className="m-1 w-5 h-5 cursor-pointer" onClick={handleClick} />
                 </div>
-                <button type="submit" className="p-2 rounded-md shadow-custom">Report your {label}</button>
-            </form>
-            <button className={`p-2 rounded-md shadow-custom ${showForm ? "hidden" : ""}`} onClick={() => setShowForm(true)}>Report a problem</button>
+                <div className="flex flex-col gap-2 mb-4">
+                    <div className="flex">
+                        <input type="text" className="bg-transparent p-2 w-2/5 mr-2 rounded-md shadow-custom focus:outline-none flex-shrink-0" placeholder="Display Name" readOnly={readOnly} value={username} onChange={(e) => setUserName(e.target.value)} />
+                        <input type="text" className="bg-transparent p-2 rounded-md shadow-custom focus:outline-none flex-grow" placeholder="email" readOnly={readOnly} value={email} />
+                    </div>
+                    <input type="text" className="bg-transparent p-2 w-2/5 rounded-md shadow-custom focus:outline-none" placeholder="status" readOnly={readOnly} value={status || ""} />
+                    <textarea className="bg-transparent p-2 h-20 rounded-md shadow-custom focus:outline-none" placeholder="Bio" readOnly={readOnly} value={bio || ""}></textarea>
+                </div>
+                <button className="bg-transparent p-2 rounded-md shadow-custom hover:scale-105" onClick={() => logout()}>Logout</button>
+            </div>
         </div>
-
     )
 }
 
-export function DataStorageFunc() {
+export function NotificationFunc() {
 
+}
+
+export function ChatSettingsFunc() {
+    const themes = ["light", "dark"]
+    const [selectedTheme, setSelectedTheme] = useState<string>("dark")
+
+    const [chatDetails, setChatDetails] = useState<boolean>(true)
+
+    return (
+        <div>
+            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
+                <p className="text-xl mb-2">Change CHIRP themes</p>
+                <div className="flex gap-2">
+                    {themes.map((item, index) => (
+                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${selectedTheme === item ? "" : "hover:scale-105"} ${selectedTheme === item ? textaccent : ""}`} disabled={selectedTheme === item} onClick={() => setSelectedTheme(item)}>{item}</button>
+                    ))}
+                </div>
+            </div>
+            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
+                <p className="text-xl mb-2">Show Chat or Group details</p>
+                <button className={`bg-transparent p-2 rounded-md shadow-custom ${chatDetails ? "" : textaccent}`} onClick={() => setChatDetails(!chatDetails)}>{chatDetails ? "enabled" : "disabled"}</button>
+            </div>
+        </div>
+    )
 }
 
 export function PrivacyFunc() {
@@ -177,69 +245,80 @@ export function PrivacyFunc() {
     )
 }
 
-export function ChatSettingsFunc() {
-    const themes = ["light", "dark"]
-    const [selectedTheme, setSelectedTheme] = useState<string>("dark")
+export function DataStorageFunc() {
+    const [warningMessage, setWarningMessage] = useState(false)
 
-    const [chatDetails, setChatDetails] = useState<boolean>(true)
-
+    function handleClear(warningMessage: boolean) {
+        if (warningMessage) {
+            //remove local all data, logout, jump to login page
+            console.log("clear cache")
+            Cookies.remove("auth")
+            localStorage.clear()
+            setWarningMessage(false)
+        } else {
+            setWarningMessage(true)
+        }
+    }
     return (
         <div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                <p className="text-xl mb-2">Change CHIRP themes</p>
-                <div className="flex gap-2">
-                    {themes.map((item, index) => (
-                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${selectedTheme === item ? "" : "hover:scale-105"} ${selectedTheme === item ? textaccent : ""}`} disabled={selectedTheme === item} onClick={() => setSelectedTheme(item)}>{item}</button>
-                    ))}
-                </div>
+                <p className="text-xl mb-2">Data usage</p>
             </div>
-            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                <p className="text-xl mb-2">Show Chat or Group details</p>
-                <button className={`bg-transparent p-2 rounded-md shadow-custom ${chatDetails ? "" : textaccent}`} onClick={() => setChatDetails(!chatDetails)}>{chatDetails ? "enabled" : "disabled"}</button>
+            <div id="clearCache" className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
+                <p className="text-xl mb-2">Clear cache</p>
+                <div className={warningMessage ? "" : "hidden"}>
+                    <p className={`${textaccent} mb-2`}>Clearing the cache clears all data stored in your browser associated with our CHIRP <br /> service, including that we log you out.</p>
+                    <p className={`${textaccent} font-semibold`}>In this process we will clear:</p>
+                    <ul className={`${textaccent} mb-4`}>
+                        <li>- chaches</li>
+                        <li>- cookies</li>
+                        <li>- session Storage</li>
+                    </ul>
+                </div>
+                <button className="p-2 rounded-md shadow-custom" onClick={() => handleClear(warningMessage)}>Clear Cache</button>
             </div>
         </div>
     )
 }
 
-export function NotificationFunc() {
+export function HelpSupportFunc() {
+    const [showForm, setShowForm] = useState(false)
+    const [label, setLabel] = useState("issue")
+    const [title, setTitle] = useState("")
+    const [description, setDescription] = useState("")
 
-}
-
-export function AccountFunc() {
-    const [readOnly, setReadOnly] = useState(true)
-    const [saving, setSaving] = useState(false)
-
-    function handleClick() {
-        if(readOnly) {
-            setReadOnly(false)
-        } else {
-            setSaving(true);
-            //Timeout simulates the saving process (time till we get a 200 OK back)
-            setTimeout(() => {
-                console.log("save data");
-                setReadOnly(true);
-                setSaving(false);
-            }, 2000); 
-        }
-        
+    function handleReport() {
+        fetch('https://api.github.com/repos/qwerty084/LF8/issues', {
+            method: 'POST',
+            headers: {
+                'Authorization': `${env.GIT_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify({
+                title: 'title',
+                body: 'Issue description',
+                labels: label
+            })
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
     }
 
     return (
-        <div>
-            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                <div className="flex justify-between">
-                    <p className="text-xl mb-2">Account Informations</p>
-                    <img src={saving? "assets/save-disabled.png" : readOnly? "assets/edit.png" : "assets/save.png"} alt="" className="m-1 w-5 h-5 cursor-pointer" onClick={handleClick}/>
-                </div>
-                <div className="flex flex-col gap-2">
-                    <div className="flex">
-                        <input type="text" className="bg-transparent p-2 w-2/5 mr-2 rounded-md shadow-custom focus:outline-none flex-shrink-0" placeholder="Display Name" readOnly={readOnly} />
-                        <input type="text" className="bg-transparent p-2 rounded-md shadow-custom focus:outline-none flex-grow" placeholder="email" readOnly={readOnly} />
-                    </div>
-                    <input type="text" className="bg-transparent p-2 w-2/5 rounded-md shadow-custom focus:outline-none" placeholder="status" readOnly={readOnly} />
-                    <textarea className="bg-transparent p-2 h-20 rounded-md shadow-custom focus:outline-none" placeholder="Bio" readOnly={readOnly}></textarea>
-                </div>
+        <div onClick={() => setShowForm(false)}>
+        <form id="form" className={`flex flex-col mt-4  w-[50%] ${showForm ? "" : "hidden"}`} onSubmit={handleReport} onClick={(e) => e.stopPropagation()}>
+            <p className={`text-sm ${textaccent} mb-4`}>! Reports are submitted as an issue by default if something important broke please select "Report as a Bug"</p>
+            <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={title} onChange={(e) => setTitle(e.target.value)} name="title" id="title" placeholder="Enter a Title" />
+            <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={description} onChange={(e) => setDescription(e.target.value)} name="description" id="description" placeholder="Describe the issue or bug" />
+            <div className="flex gap-4 mb-2">
+                {env.GIT_LABELS.map((item, index) => (
+                    <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${label === item ? "" : "hover:scale-105"} ${label === item ? textaccent : ""}`} disabled={label === item} onClick={() => setLabel(item)}>{item}</button>
+                ))}
             </div>
-        </div>
+            <button type="submit" className="p-2 rounded-md shadow-custom">Report your {label}</button>
+        </form>
+        <button className={`p-2 rounded-md shadow-custom ${showForm ? "hidden" : ""}`} onClick={(e) => { e.stopPropagation(); setShowForm(true); }}>Report a problem</button>
+    </div>
+
     )
 }
