@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { testmeets } from "@/components/testdata.component";
+import MapComponent from "@/components/meet.component";
+import { fromAddress } from 'react-geocode';
 
 interface MeetingType {
   id: number;
@@ -12,6 +14,7 @@ interface MeetingType {
 }
 
 export default function MeetAndGreet() {
+  const [marker, setMarker] = useState({id: 0, lat: 1, lng: 1});
   const defaultMeet = {
     id: 0,
     name: "",
@@ -24,26 +27,39 @@ export default function MeetAndGreet() {
   const [meetings, setMeetings] = useState<MeetingType[]>([]);
   const [meeting, setMeeting] = useState<MeetingType>(defaultMeet);
   const [createMeet, setCreateMeet] = useState<boolean | null>(null)
+
+
   function get_meets() {
     setMeetings(testmeets);
   }
 
-  function select_meet(id: number) {
-    if (id === meeting?.id) {
-      setMeeting(defaultMeet)
-      setCreateMeet(null)
-    } else {
-      setMeeting({
-        id: id,
-        name: "first meeting",
-        description: "test",
-        participants: [1, 2, 3],
-        adress: "123-123",
-        datetime: "2023-12-18",
-      })
-      setCreateMeet(false)
+async function select_meet(id: number) {
+  if (id === meeting?.id) {
+    setMeeting(defaultMeet);
+    setCreateMeet(null);
+    setMarker({id: 0, lat: 1, lng: 1})
+  } else {
+    const selectedMeeting = meetings.find(meet => meet.id === id);
+    if (selectedMeeting) {
+      setMeeting(selectedMeeting);
+      const meetAdress = selectedMeeting.adress
+      if (meetAdress && meetAdress.length > 0) {
+        fromAddress(meetAdress, "AIzaSyDusDtZyAnRDAOfUUnqb4gObtbz9z74_sg")
+          .then(({ results }) => {
+            const { lat, lng } = results[0].geometry.location;
+            console.log(lat, lng);
+            setNewCoordinates({lat, lng});
+
+            // Add the new marker to the markers state
+            setMarker({id:1, lat, lng});
+          })
+          .catch(console.error);
+      }
+      setCreateMeet(false);
     }
   }
+}
+  
 
   function select_create_meet() {
     if (createMeet === true) {
@@ -74,6 +90,11 @@ export default function MeetAndGreet() {
     get_meets();
   }, []);
 
+  const [newCoordinates, setNewCoordinates] = useState({
+    lat: 53.753450,
+    lng: 9.939530
+  });
+
   return (
     <div id="body" className="flex flex-row flex-grow">
       <div className="flex flex-col w-24 h-full shadow-custom">
@@ -101,10 +122,7 @@ export default function MeetAndGreet() {
       <div className="flex flex-grow justify-between shadow-custom">
         <div id="chat" className="p-4 w-full">
           <div className="flex justify-center h-1/2">
-            <iframe
-              className="w-3/5 rounded-xl"
-              src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=+()&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
-            ></iframe>
+            <MapComponent coordinates={newCoordinates} title={meeting.name} markerId={marker.id}/>
           </div>
         </div>
 
@@ -129,11 +147,11 @@ export default function MeetAndGreet() {
           </div>
           <div id="meet_adress" className="flex flex-col mb-4">
             <span className="font-semibold">Adress to Meet</span>
-            <input type="text" placeholder={new Date().toISOString().slice(0, 10)} className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.adress} onChange={(e) => handleInputChange(e, 'adress')} />
+            <input type="text" placeholder="test 123, 25451" className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.adress} onChange={(e) => handleInputChange(e, 'adress')} />
           </div>
           <div id="meet_datetime" className="flex flex-col mb-4">
             <span className="font-semibold">Date and Time</span>
-            <input type="text" placeholder="" className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.datetime} onChange={(e) => handleInputChange(e, 'datetime')} />
+            <input type="datetime-local" placeholder="" className="w-full p-2 focus:outline-none shadow-xl text-xl bg-transparent" value={meeting.datetime} onChange={(e) => handleInputChange(e, 'datetime')} />
           </div>
         </div>
 

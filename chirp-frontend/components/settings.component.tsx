@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
-import { session } from "@/components/session.component";
+import { session } from "@/components/auth.component";
 import { textColor, textaccent } from "@/app/layout";
 import { env } from "@/env";
 import Cookies from "js-cookie";
@@ -27,15 +27,7 @@ export const settingPage: SettingPageType = {
         return (
             <div>
                 <h1 className="text-2xl mb-8">Notifications</h1>
-                <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                    <p className="text-xl mb-2">{`Maybe comming soon ;)`}</p>
-                </div>
-                <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                    <p className="text-xl mb-2">Change notification sound</p>
-                </div>
-                <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                    <p className="text-xl mb-2">Mute notifications for a certain period</p>
-                </div>
+                <NotificationFunc />
             </div>
         )
     },
@@ -118,6 +110,8 @@ export function AccountFunc() {
     const [status, setStatus] = useState<string | undefined>(accountdata?.user.status || undefined)
     const [bio, setBio] = useState<string | undefined>(accountdata?.user.bio || undefined)
 
+    const [removeWarning, setRemoveWarning] = useState<number>(0)
+
     function getaccountdata() {
         const jwt = Cookies.get("auth");
 
@@ -150,7 +144,7 @@ export function AccountFunc() {
 
                     Authorization: `Bearer ${Cookies.get("auth")}`,
                 },
-                body: JSON.stringify(request_data),
+                body: JSON.stringify(request_data)
             });
             const data = await response.json();
             if (response.status === 200) {
@@ -160,6 +154,41 @@ export function AccountFunc() {
             }
         }
     }
+
+    async function handleRemove() {
+        switch (removeWarning) {
+            case 0:
+                setRemoveWarning(1);
+                break;
+            case 1:
+                if (window.confirm("Warning alert")) {
+                    setRemoveWarning(2);
+                }
+                break;
+            case 2:
+                let url = `${env.API_URL}/users/${accountdata?.user.id}`;
+
+                const response = await fetch(url, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/merge-patch+json",
+                        Authorization: `Bearer ${Cookies.get("auth")}`,
+                    },
+                });
+                if (response.status === 204) {
+                    console.log("User Removed Successfully");
+                    Cookies.remove("auth");
+                    localStorage.clear();
+                    window.location.href = ("/login");
+                } else {
+                    console.log("an error occured");
+                }
+                break;
+            default:
+                console.log("Invalid removeWarning value");
+        }
+    }
+
 
     function logout() {
         Cookies.remove("auth")
@@ -189,19 +218,78 @@ export function AccountFunc() {
                 </div>
                 <button className="bg-transparent p-2 rounded-md shadow-custom hover:scale-105" onClick={() => logout()}>Logout</button>
             </div>
+            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
+                <div className="flex justify-between">
+                    <p className="text-xl mb-2">Account behaviour</p>
+                    <img src="" alt="" />
+                </div>
+                <div className="flex flex-col gap-2 mb-4">
+                    <p id="delete_warning" className={`${removeWarning === 1 ? "" : "hidden"}`}>Deleting your account will result in the deletion of all your account data, including personal information and preferences.
+                        Please note that chat messages will remain unaffected. <br /> This action cannot be undone.</p>
+                    <p id="cannow_delete_message" className={`${removeWarning === 2 ? "" : "hidden"}`}>Were sad to see a member of chirp going. <br /> But u can delete your account now with another click at the delete button</p>
+                    <div className="flex justify-center">
+                        <button className="bg-transparent w-5/6 duration-300 ease-in-out transform p-2 rounded-md shadow-custom hover:scale-105" onClick={() => handleRemove()}>Delete Account</button>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }
 
 export function NotificationFunc() {
+    const [notificationSound, setNotificationSound] = useState<string | undefined>(session.config.data?.notifications.sound)
+    const [muteTime, setMuteTime] = useState<number | undefined>(session.config.data?.notifications.mute)
 
+    function notificationSoundFunc(selectedSound: string) {
+        session.config.modifyConfig("notifications", "sound", selectedSound)
+        setNotificationSound(selectedSound)
+    }
+
+    function muteFunc(selectedMuteTime: number) {
+        session.config.modifyConfig("notifications", "mute", selectedMuteTime)
+        setMuteTime(selectedMuteTime)
+    }
+
+    return (
+        <div>
+            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
+                <p className="text-xl mb-2">{`Currently just Decoration ;)`}</p>
+            </div>
+            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
+                <p className="text-xl mb-2">Change notification sound</p>
+                <div className="flex gap-2">
+                    {env.NotificationSounds.map((item, index) => (
+                        <button className={`bg-transparent p-2 rounded-md shadow-custom ${notificationSound === item ? "" : "hover:scale-105"} ${notificationSound === item ? textaccent : ""}`} disabled={notificationSound === item} onClick={() => notificationSoundFunc(item)}>{item}</button>
+                    ))}
+                </div>
+            </div>
+            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
+                <p className="text-xl mb-2">Mute notifications</p>
+                <div className="flex gap-2">
+                    {env.MutePeriod.map((item, index) => (
+                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${muteTime === item.key ? "" : "hover:scale-105"} ${muteTime === item.key ? textaccent : ""}`} disabled={muteTime === item.key} onClick={() => muteFunc(item.key)}>{item.displayName}</button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
 }
 
 export function ChatSettingsFunc() {
     const themes = ["light", "dark"]
-    const [selectedTheme, setSelectedTheme] = useState<string>("dark")
+    const [selectedTheme, setSelectedTheme] = useState<string | undefined>(session.config.data?.chat.theme)
 
-    const [chatDetails, setChatDetails] = useState<boolean>(true)
+    const [chatDetails, setChatDetails] = useState<boolean | undefined>(session.config.data?.chat.details)
+
+    function themeFunc(theme: string) {
+        session.config.modifyConfig("chat", "theme", theme)
+        setSelectedTheme(theme)
+    }
+
+    function detailsFunc(details: boolean) {
+        session.config.modifyConfig("chat", "details", details)
+        setChatDetails(details)
+    }
 
     return (
         <div>
@@ -209,13 +297,13 @@ export function ChatSettingsFunc() {
                 <p className="text-xl mb-2">Change CHIRP themes</p>
                 <div className="flex gap-2">
                     {themes.map((item, index) => (
-                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${selectedTheme === item ? "" : "hover:scale-105"} ${selectedTheme === item ? textaccent : ""}`} disabled={selectedTheme === item} onClick={() => setSelectedTheme(item)}>{item}</button>
+                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${selectedTheme === item ? "" : "hover:scale-105"} ${selectedTheme === item ? textaccent : ""}`} disabled={selectedTheme === item} onClick={() => themeFunc(item)}>{item}</button>
                     ))}
                 </div>
             </div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <p className="text-xl mb-2">Show Chat or Group details</p>
-                <button className={`bg-transparent p-2 rounded-md shadow-custom ${chatDetails ? "" : textaccent}`} onClick={() => setChatDetails(!chatDetails)}>{chatDetails ? "enabled" : "disabled"}</button>
+                <button className={`bg-transparent p-2 rounded-md shadow-custom ${chatDetails ? "" : textaccent}`} onClick={() => detailsFunc(!chatDetails)}>{chatDetails ? "enabled" : "disabled"}</button>
             </div>
         </div>
     )
@@ -223,8 +311,18 @@ export function ChatSettingsFunc() {
 
 export function PrivacyFunc() {
     const privacyLevels = [{ displayName: "every one", level: 1 }, { displayName: "just my friends", level: 2 }, { displayName: "no one", level: 3 }]
-    const [meetInviteLevel, setMeetInviteLevel] = useState<number>(1)
-    const [inviteLevel, setInviteLevel] = useState<number>(1)
+    const [meetInviteLevel, setMeetInviteLevel] = useState<number | undefined>(session.config.data?.privacy.meetInviteLevel)
+    const [friendInviteLEvel, setFriendInviteLEvel] = useState<number | undefined>(session.config.data?.privacy.friendInviteLEvel)
+
+    function meetInviteLevelFunc(level: number) {
+        session.config.modifyConfig("privacy", "meetInviteLevel", level)
+        setMeetInviteLevel(level)
+    }
+
+    function friendInviteLEvelFunc(level: number) {
+        session.config.modifyConfig("privacy", "friendInviteLEvel", level)
+        setFriendInviteLEvel(level)
+    }
 
     return (
         <div>
@@ -235,7 +333,7 @@ export function PrivacyFunc() {
                 <p className="text-xl mb-2">Who can see you</p>
                 <div className="flex gap-2">
                     {privacyLevels.map((item, index) => (
-                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${inviteLevel === item.level ? "" : "hover:scale-105"} ${inviteLevel === item.level ? textaccent : ""}`} disabled={inviteLevel === item.level} onClick={() => setInviteLevel(item.level)}>{item.displayName}</button>
+                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${friendInviteLEvel === item.level ? "" : "hover:scale-105"} ${friendInviteLEvel === item.level ? textaccent : ""}`} disabled={friendInviteLEvel === item.level} onClick={() => friendInviteLEvelFunc(item.level)}>{item.displayName}</button>
                     ))}
                 </div>
             </div>
@@ -243,7 +341,7 @@ export function PrivacyFunc() {
                 <p className="text-xl mb-2">Who can invite you to a meet</p>
                 <div className="flex gap-2">
                     {privacyLevels.map((item, index) => (
-                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${meetInviteLevel === item.level ? "" : "hover:scale-105"} ${meetInviteLevel === item.level ? textaccent : ""}`} disabled={meetInviteLevel === item.level} onClick={() => setMeetInviteLevel(item.level)}>{item.displayName}</button>
+                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${meetInviteLevel === item.level ? "" : "hover:scale-105"} ${meetInviteLevel === item.level ? textaccent : ""}`} disabled={meetInviteLevel === item.level} onClick={() => meetInviteLevelFunc(item.level)}>{item.displayName}</button>
                     ))}
                 </div>
             </div>

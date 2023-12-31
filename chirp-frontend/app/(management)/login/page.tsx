@@ -2,12 +2,12 @@
 import React, { useState } from "react";
 import { itemColor } from "../../layout";
 import { env } from "../../../env"
-import { useCreate, session } from "../../../components/session.component"
+import { session } from "../../../components/auth.component"
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassoword] = useState("");
-  const [loginError, setLoginError] = useState("");
+  const [loginError, setLoginError] = useState<boolean>(false);
 
   async function handleSubmit(e: any) {
     e.preventDefault();
@@ -28,9 +28,10 @@ export default function Login() {
     const data = await response.json();
     if (data.code === 401) {
       console.log("Unauthorized");
+      setLoginError(true)
     } else {
       console.log("authorized")
-      useCreate.auth(data.token);
+      session.auth.createAuthCookie(data.token);
       window.location.href = "/";
     }
   }
@@ -48,7 +49,7 @@ export default function Login() {
               Email
             </label>
             <input
-              className={`w-full bg-transparent shadow-custom rounded-md p-2 focus:outline-none ${loginError ? "border-red-500" : ""}`}
+              className={`w-full bg-transparent shadow-custom rounded-md p-2 focus:outline-none ${loginError ? "border-2 border-red-500" : ""}`}
               type="email"
               name="email"
               id="email"
@@ -62,7 +63,7 @@ export default function Login() {
               Password
             </label>
             <input
-              className={`w-full bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${loginError ? "border-red-500" : ""}`}
+              className={`w-full bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${loginError ? "border-2 border-red-500" : ""}`}
               type="password"
               name="password"
               id="password"

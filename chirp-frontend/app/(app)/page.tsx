@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { emptyChat } from "../../components/loading.component";
-import { session } from "@/components/session.component";
+import { session } from "@/components/auth.component";
 import { testcontacts, testgroups, testchat } from "../../components/testdata.component"
 
 type Members = {
@@ -55,7 +55,6 @@ export default function Home() {
 
   const [groups, setGroups] = useState<GroupType[]>([]);
   const [contacts, setContacts] = useState<ContactType[]>([]);
-  const { user } = session()
 
   const [chat, setChat] = useState<chatType[] | null>();
   const [message, setMessage] = useState<string>("")
@@ -208,8 +207,8 @@ export default function Home() {
         <div className="flex flex-col w-[100%] h-[100%] mx-4">
           <div id="chatMessages" className="h-[80vh] overflow-y-auto scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-100">
             {!chat ? emptyChat() : chat?.map((item, index) => (
-              item.senderId === user?.id ?
-                <div key={index} className="flex justify-end items-center mt-2">{item.message}<img src={user.avatar} alt="" className="rounded-full ml-2 w-10" /></div>
+              item.senderId === session.user.data?.id ?
+                <div key={index} className="flex justify-end items-center mt-2">{item.message}<img src={session.user.data.avatar} alt="" className="rounded-full ml-2 w-10" /></div>
                 :
                 <div key={index} className="flex justify-start items-center mt-2"><img src={isGroup ?  groupDetails?.members.find(member => member.id === item.senderId)?.avatar : userDetails?.avatar} alt="" className="rounded-full mr-2 w-10" />{item.message}</div>
             ))}
@@ -221,12 +220,12 @@ export default function Home() {
             </label>
             <input type="file" name="upload" id="upload" className="hidden" />
             <input type="text" className="w-full pl-2 text-md rounded-md bg-transparent shadow-custom focus:outline-none" placeholder="Enter your Message" value={message} onChange={(e) => setMessage(e.target.value)} onKeyPress={handleKeyPress} />
-            <img src="assets/send.png" id="send" className="w-10 h-10 text-xl cursor-pointer" onClick={() => user && user.id && send_message(user?.id, message)} />
+            <img src="assets/send.png" id="send" className="w-10 h-10 text-xl cursor-pointer" onClick={() => session.user.data && session.user.data.id && send_message(session.user.data?.id, message)} />
           </div>
         </div>
         <div
           id="userDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${user?.config.chatDetails === true && isGroup === false ? "" : "hidden"
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${session.config.data?.chat?.details === true && isGroup === false ? "" : "hidden"
             }`}
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
@@ -260,7 +259,7 @@ export default function Home() {
 
         <div
           id="groupDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${user?.config.chatDetails && isGroup === true ? "" : "hidden"
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${session.config.data?.chat?.details && isGroup === true ? "" : "hidden"
             }`}
         >
           <div id="head" className="flex flex-row gap-2 mb-4">

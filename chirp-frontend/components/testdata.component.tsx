@@ -72,7 +72,7 @@ export const testmeets = [
         name: "first meeting",
         description: "test",
         participants: [1, 2, 3],
-        adress: "123-123",
+        adress: "Bahnstraße 132f, 25451",
         datetime: "2023-12-18",
     },
     {
@@ -80,7 +80,7 @@ export const testmeets = [
         name: "second meeting",
         description: "test",
         participants: [1, 2, 3],
-        adress: "123-123",
+        adress: "Bahnstraße, 25451",
         datetime: "2023-12-18",
     },
     {
@@ -88,7 +88,7 @@ export const testmeets = [
         name: "third meeting",
         description: "test",
         participants: [1, 2, 3],
-        adress: "123-123",
+        adress: "Axel-Springer-Platz 3, 20355 Hamburg, Deutschland",
         datetime: "2023-12-18",
     },
 ]

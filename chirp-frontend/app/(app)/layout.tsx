@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { bgColor, itemColor, textColor } from "../layout";
-import { useCreate, session } from "../../components/session.component"
+import { session } from "@/components/auth.component"
 import { LoadingScreen } from "@/components/loading.component";
 
 export default function RootLayout({
@@ -18,21 +18,17 @@ export default function RootLayout({
     window.location.href = "/"
   }
 
-  const { isAuthenticated, user, loading } = session()
+//if (loading) {
+//  return (
+//    <div>
+//      <LoadingScreen />
+//    </div>
+//  )
+//}
 
-
-  if (loading) {
-    return (
-      <div>
-        <LoadingScreen />
-      </div>
-    )
-  }
-
-  if (!isAuthenticated) {
+  if (!session.auth.isAuthenticated(session.user, session.config)) {
     window.location.href = "/login"
   } else {
-    console.log(user)
     return (
       <div className={`flex flex-col h-screen w-screen ${bgColor} ${textColor}`}>
         <div id="header" className="flex flex-row w-full">
@@ -66,8 +62,8 @@ export default function RootLayout({
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src={user?.avatar} className="w-16 cursor-pointer" onClick={() => window.location.href = "/settings"}/>
-              <p className="cursor-pointer" onClick={() => window.location.href = "/settings"}>{user?.username}</p>
+              <img src={session.user.data?.avatar} className="w-16 cursor-pointer" onClick={() => window.location.href = "/settings"}/>
+              <p className="cursor-pointer" onClick={() => window.location.href = "/settings"}>{session.user.data?.username}</p>
             </div>
           </div>
         </div>
