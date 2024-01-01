@@ -12,7 +12,7 @@ export default function Settings() {
         { key: "dataStorage", displayName: "Data & Storage Settings" },
         { key: "helpSupport", displayName: "Help & Support" }
     ]
-    const [selectedSetting, setSelectedSetting] = useState("account")
+    const [selectedSetting, setSelectedSetting] = useState("privacy")
 
     const [showForm, setShowForm] = useState(false)
 

@@ -85,47 +85,18 @@ export function getPage(key: string): () => JSX.Element {
 
 export function AccountFunc() {
 
-    interface UserJwtPayload extends JwtPayload {
-        iat: number,
-        exp: number,
-        user: {
-            id: number,
-            username: string,
-            email: string,
-            status: string | null,
-            bio: string | null,
-            ip: string,
-            avatar: string,
-        }
-    }
-
     const [readOnly, setReadOnly] = useState(true)
     const [saving, setSaving] = useState(false)
 
-
-    const accountdata = getaccountdata();
-
-    const [username, setUserName] = useState<string | undefined>(accountdata?.user.username)
-    const [email, setEmail] = useState<string | undefined>(accountdata?.user.email)
-    const [status, setStatus] = useState<string | undefined>(accountdata?.user.status || undefined)
-    const [bio, setBio] = useState<string | undefined>(accountdata?.user.bio || undefined)
+    const [username, setUserName] = useState<string | undefined>(session.user.data?.username)
+    const [email, setEmail] = useState<string | undefined>(session.user.data?.email)
+    const [status, setStatus] = useState<string | undefined>(session.user.data?.status || undefined)
+    const [bio, setBio] = useState<string | undefined>(session.user.data?.bio || undefined)
 
     const [removeWarning, setRemoveWarning] = useState<number>(0)
 
-    function getaccountdata() {
-        const jwt = Cookies.get("auth");
-
-        if (!jwt) {
-            return null;
-        }
-
-        const payload = jwtDecode<UserJwtPayload>(jwt);
-
-        return payload;
-    }
-
-    async function handleClick() {
-        let url = `${env.API_URL}/users/${accountdata?.user.id}`;
+    async function handleEditOrSave() {
+        let url = `${env.API_URL}/users/${session.user.data?.id}`;
         if (readOnly) {
             setReadOnly(false)
         } else {
@@ -166,7 +137,7 @@ export function AccountFunc() {
                 }
                 break;
             case 2:
-                let url = `${env.API_URL}/users/${accountdata?.user.id}`;
+                let url = `${env.API_URL}/users/${session.user.data?.id}`;
 
                 const response = await fetch(url, {
                     method: "DELETE",
@@ -200,7 +171,7 @@ export function AccountFunc() {
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <div className="flex justify-between">
                     <p className="text-xl mb-2">Account Informations</p>
-                    <img src={saving ? "assets/save-disabled.png" : readOnly ? "assets/edit.png" : "assets/save.png"} alt="" className="m-1 w-5 h-5 cursor-pointer" onClick={handleClick} />
+                    <img src={saving ? "assets/save-disabled.png" : readOnly ? "assets/edit.png" : "assets/save.png"} alt="" className="m-1 w-5 h-5 cursor-pointer" onClick={handleEditOrSave} />
                 </div>
                 <div className="flex flex-col gap-2 mb-4">
                     <div className="flex">
@@ -310,9 +281,19 @@ export function ChatSettingsFunc() {
 }
 
 export function PrivacyFunc() {
+
+    interface blockedUserType {
+        userName: string;
+        id: number;
+    }
+
     const privacyLevels = [{ displayName: "every one", level: 1 }, { displayName: "just my friends", level: 2 }, { displayName: "no one", level: 3 }]
     const [meetInviteLevel, setMeetInviteLevel] = useState<number | undefined>(session.config.data?.privacy.meetInviteLevel)
     const [friendInviteLEvel, setFriendInviteLEvel] = useState<number | undefined>(session.config.data?.privacy.friendInviteLEvel)
+
+    const [blockedUser, setBlockedUser] = useState<blockedUserType[]>([{ userName: "Currently no blocked user", id: 0 }])
+    const [userError, setUserError] = useState<boolean>(false)
+    const [userInput, setUserInput] = useState<number>()
 
     function meetInviteLevelFunc(level: number) {
         session.config.modifyConfig("privacy", "meetInviteLevel", level)
@@ -323,14 +304,26 @@ export function PrivacyFunc() {
         session.config.modifyConfig("privacy", "friendInviteLEvel", level)
         setFriendInviteLEvel(level)
     }
+    function handleBlockUser() {
+
+    }
+
+    function handleKeyPressed() {
+
+    }
 
     return (
         <div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <p className="text-xl mb-2">Block user</p>
+                <p>Enter Username or id to block</p>
+                <input type="number" onKeyPress={handleKeyPressed} value={userInput} onChange={(e) => setUserInput(Number(e.target.value))} className={`w-1/2 bg-transparent shadow-custom rounded-md py-1 px-2 focus:outline-none mb-8 mt-2 ${userError ? "border-2 border-red-500" : ""}`} />
+                <div id="blockedUserList" className="flex gap-2">{blockedUser.map((item, index) => (
+                    <div className="p-2 shadow-custom rounded-md">{item.userName} <button className={`${item.id === 0 ? "hidden" : ""} ${textColor} hover:text-red-500`}>X</button></div>
+                ))}</div>
             </div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                <p className="text-xl mb-2">Who can see you</p>
+                <p className="text-xl mb-2">Who can send you a friend request</p>
                 <div className="flex gap-2">
                     {privacyLevels.map((item, index) => (
                         <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${friendInviteLEvel === item.level ? "" : "hover:scale-105"} ${friendInviteLEvel === item.level ? textaccent : ""}`} disabled={friendInviteLEvel === item.level} onClick={() => friendInviteLEvelFunc(item.level)}>{item.displayName}</button>
