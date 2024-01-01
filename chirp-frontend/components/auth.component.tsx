@@ -100,6 +100,7 @@ export const session = {
     removeUser: function () {
       this.data = null;
     },
+    modifyUser: function() {}
   },
   config: {
     data: null as LocalConfigType | null,

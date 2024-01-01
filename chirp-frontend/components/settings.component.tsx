@@ -1,10 +1,9 @@
 "use client"
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { session } from "@/components/auth.component";
 import { textColor, textaccent } from "@/app/layout";
 import { env } from "@/env";
 import Cookies from "js-cookie";
-import { JwtPayload, jwtDecode } from "jwt-decode";
 
 type SettingPageType = {
     account: () => JSX.Element;
@@ -85,47 +84,18 @@ export function getPage(key: string): () => JSX.Element {
 
 export function AccountFunc() {
 
-    interface UserJwtPayload extends JwtPayload {
-        iat: number,
-        exp: number,
-        user: {
-            id: number,
-            username: string,
-            email: string,
-            status: string | null,
-            bio: string | null,
-            ip: string,
-            avatar: string,
-        }
-    }
-
     const [readOnly, setReadOnly] = useState(true)
     const [saving, setSaving] = useState(false)
 
-
-    const accountdata = getaccountdata();
-
-    const [username, setUserName] = useState<string | undefined>(accountdata?.user.username)
-    const [email, setEmail] = useState<string | undefined>(accountdata?.user.email)
-    const [status, setStatus] = useState<string | undefined>(accountdata?.user.status || undefined)
-    const [bio, setBio] = useState<string | undefined>(accountdata?.user.bio || undefined)
+    const [username, setUserName] = useState<string | undefined>(session.user.data?.username)
+    const [email, setEmail] = useState<string | undefined>(session.user.data?.email)
+    const [status, setStatus] = useState<string | undefined>(session.user.data?.status || undefined)
+    const [bio, setBio] = useState<string | undefined>(session.user.data?.bio || undefined)
 
     const [removeWarning, setRemoveWarning] = useState<number>(0)
 
-    function getaccountdata() {
-        const jwt = Cookies.get("auth");
-
-        if (!jwt) {
-            return null;
-        }
-
-        const payload = jwtDecode<UserJwtPayload>(jwt);
-
-        return payload;
-    }
-
-    async function handleClick() {
-        let url = `${env.API_URL}/users/${accountdata?.user.id}`;
+    async function handleEditOrSave() {
+        let url = `${env.API_URL}/users/${session.user.data?.id}`;
         if (readOnly) {
             setReadOnly(false)
         } else {
@@ -166,7 +136,7 @@ export function AccountFunc() {
                 }
                 break;
             case 2:
-                let url = `${env.API_URL}/users/${accountdata?.user.id}`;
+                let url = `${env.API_URL}/users/${session.user.data?.id}`;
 
                 const response = await fetch(url, {
                     method: "DELETE",
@@ -200,7 +170,7 @@ export function AccountFunc() {
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <div className="flex justify-between">
                     <p className="text-xl mb-2">Account Informations</p>
-                    <img src={saving ? "assets/save-disabled.png" : readOnly ? "assets/edit.png" : "assets/save.png"} alt="" className="m-1 w-5 h-5 cursor-pointer" onClick={handleClick} />
+                    <img src={saving ? "assets/save-disabled.png" : readOnly ? "assets/edit.png" : "assets/save.png"} alt="" className="m-1 w-5 h-5 cursor-pointer" onClick={handleEditOrSave} />
                 </div>
                 <div className="flex flex-col gap-2 mb-4">
                     <div className="flex">
@@ -259,7 +229,7 @@ export function NotificationFunc() {
                 <p className="text-xl mb-2">Change notification sound</p>
                 <div className="flex gap-2">
                     {env.NotificationSounds.map((item, index) => (
-                        <button className={`bg-transparent p-2 rounded-md shadow-custom ${notificationSound === item ? "" : "hover:scale-105"} ${notificationSound === item ? textaccent : ""}`} disabled={notificationSound === item} onClick={() => notificationSoundFunc(item)}>{item}</button>
+                        <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${notificationSound === item ? "" : "hover:scale-105"} ${notificationSound === item ? textaccent : ""}`} disabled={notificationSound === item} onClick={() => notificationSoundFunc(item)}>{item}</button>
                     ))}
                 </div>
             </div>
@@ -310,9 +280,19 @@ export function ChatSettingsFunc() {
 }
 
 export function PrivacyFunc() {
+
+    interface blockedUserType {
+        userName: string;
+        id: number;
+    }
+
     const privacyLevels = [{ displayName: "every one", level: 1 }, { displayName: "just my friends", level: 2 }, { displayName: "no one", level: 3 }]
     const [meetInviteLevel, setMeetInviteLevel] = useState<number | undefined>(session.config.data?.privacy.meetInviteLevel)
     const [friendInviteLEvel, setFriendInviteLEvel] = useState<number | undefined>(session.config.data?.privacy.friendInviteLEvel)
+
+    const [blockedUser, setBlockedUser] = useState<blockedUserType[]>([{ userName: "Currently no blocked user", id: 0 }])
+    const [userError, setUserError] = useState<boolean>(false)
+    const [userInput, setUserInput] = useState<number | undefined>(undefined)
 
     function meetInviteLevelFunc(level: number) {
         session.config.modifyConfig("privacy", "meetInviteLevel", level)
@@ -324,13 +304,75 @@ export function PrivacyFunc() {
         setFriendInviteLEvel(level)
     }
 
+    async function handleBlockUser(userId: number) {
+        let url = `${env.API_URL}/users/${userId}`
+        if (userId !== 0) {
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${Cookies.get("auth")}`,
+                },
+            });
+            const data = await response.json();
+            switch (response.status) {
+                case 200:
+                    if (blockedUser[0] && (blockedUser[0].id === 0 || blockedUser[0].id === undefined)) {
+                        setBlockedUser([{ userName: data.username, id: userId }])
+                    } else {
+                        if (blockedUser.some(user => user.id === userId)) {
+                            setBlockedUser([...blockedUser, { userName: data.username, id: userId }]);
+                            //setUserError(true)
+                            //console.log("already in blockedUser");
+                        } else {
+                            setUserError(false)
+                            setBlockedUser([...blockedUser, { userName: data.username, id: userId }]);
+                        }
+                    }
+                    break;
+                case 404:
+                    setUserError(true)
+                    console.log("User Not found")
+                    break;
+            }
+        }
+    }
+
+    function handleKeyPressed(event: React.KeyboardEvent) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            handleBlockUser(userInput || 0)
+        }
+    }
+
+    function handleRemoveBlock(id: number) {
+        setBlockedUser(blockedUser.filter(user => user.id !== id));
+    }
+
+    useEffect(() => {
+        //fetch blocked user list
+    }, [])
+
     return (
         <div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <p className="text-xl mb-2">Block user</p>
+                <p>Enter User Id to block</p>
+                <div className={`flex w-1/2 bg-transparent shadow-custom rounded-md py-1 px-2 mb-8 mt-2 ${userError ? "border-2 border-red-500" : ""}`}>
+                    <input type="number" className="flex flex-grow bg-transparent focus:outline-none" onKeyPress={handleKeyPressed} onChange={(e) => setUserInput(Number(e.target.value))} />
+                    <img src="/assets/magnifying-glass.png" alt="search" className="w-6 h-6 cursor-pointer" onClick={() => handleBlockUser(userInput || 0)} />
+                </div>
+                <div id="blockedUserList" className="flex flex-wrap gap-2">
+                    {blockedUser.map((item, index) => (
+                        <div key={index} className="p-2 shadow-custom rounded-md">
+                            {item.userName}
+                            <button className={`ml-2 ${item.id === 0 ? "hidden" : ""} ${textColor} hover:text-red-500`} onClick={() => handleRemoveBlock(item.id)}>X</button>
+                        </div>
+                    ))}
+                </div>
             </div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                <p className="text-xl mb-2">Who can see you</p>
+                <p className="text-xl mb-2">Who can send you a friend request</p>
                 <div className="flex gap-2">
                     {privacyLevels.map((item, index) => (
                         <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${friendInviteLEvel === item.level ? "" : "hover:scale-105"} ${friendInviteLEvel === item.level ? textaccent : ""}`} disabled={friendInviteLEvel === item.level} onClick={() => friendInviteLEvelFunc(item.level)}>{item.displayName}</button>
@@ -351,6 +393,8 @@ export function PrivacyFunc() {
 
 export function DataStorageFunc() {
     const [warningMessage, setWarningMessage] = useState(false)
+    let cookieSize = document.cookie.length;
+    let localStorageSize = JSON.stringify(localStorage).length;
 
     function handleClear(warningMessage: boolean) {
         if (warningMessage) {
@@ -367,6 +411,21 @@ export function DataStorageFunc() {
         <div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <p className="text-xl mb-2">Data usage</p>
+                <div className="flex justify-between mb-2 mr-[50%] p-2 rounded-md shadow-custom">
+                    <p>LocalStorage: </p>
+                    {
+                        localStorageSize > 1024 ?
+                            <p>{(localStorageSize / 1024).toFixed(1)} kibibytes</p> : <p>{localStorageSize} bytes</p>
+                    }
+                </div>
+                <div className="flex justify-between mr-[50%] p-2 rounded-md shadow-custom">
+                    <p>Cookies: </p>
+                    {
+                        cookieSize > 1024 ?
+                            <p>{(cookieSize / 1024).toFixed(1)} kibibytes</p> : <p>{cookieSize} bytes</p>
+                    }
+                </div>
+
             </div>
             <div id="clearCache" className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <p className="text-xl mb-2">Clear cache</p>
