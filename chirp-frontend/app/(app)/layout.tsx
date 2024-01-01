@@ -1,33 +1,39 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { bgColor, itemColor, textColor } from "../layout";
-import { useCreate, session } from "../../components/session"
+import { session } from "@/components/auth.component"
+import { LoadingScreen } from "@/components/loading.component";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [searchInput, setSearchInput] = useState<string>();
+
   function meetandgreet() {
-    window.location.href = "/meet&greet";   
+    window.location.href = "/meet&greet";
   }
   function chats() {
     window.location.href = "/"
   }
 
-  const {isAuthenticated, user } = session()
+//if (loading) {
+//  return (
+//    <div>
+//      <LoadingScreen />
+//    </div>
+//  )
+//}
 
-  if(!isAuthenticated) {
-    console.log(user)
-    return(<div>Unauthorized</div>)
-    //window.location.href = "/login"
+  if (!session.auth.isAuthenticated(session.user, session.config)) {
+    window.location.href = "/login"
   } else {
-
     return (
       <div className={`flex flex-col h-screen w-screen ${bgColor} ${textColor}`}>
         <div id="header" className="flex flex-row w-full">
           <div className="w-24 h-24 shadow-custom">
-            <img src="assets/chirp_logo.png" className="cursor-pointer" onClick={() => chats()}/>
+            <img src="assets/chirp_logo.png" className="cursor-pointer" onClick={() => chats()} />
           </div>
           <div className="flex justify-center items-center w-1/6 h-24 ">
             <input
@@ -35,6 +41,8 @@ export default function RootLayout({
               name="search"
               className="w-5/6 h-1/2 bg-transparent shadow-md text-center rounded-md focus:outline-none"
               placeholder="Search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
           <div className="flex justify-end flex-grow pr-2 h-24 gap-4 shadow-custom">
@@ -54,12 +62,12 @@ export default function RootLayout({
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src="assets/my.png" className="w-16" />
-              {user?.username}
+              <img src={session.user.data?.avatar} className="w-16 cursor-pointer" onClick={() => window.location.href = "/settings"}/>
+              <p className="cursor-pointer" onClick={() => window.location.href = "/settings"}>{session.user.data?.username}</p>
             </div>
           </div>
         </div>
-        {children}
+          {children}
       </div>
     );
   }

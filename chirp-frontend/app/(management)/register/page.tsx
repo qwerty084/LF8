@@ -12,33 +12,41 @@ export default function Registration() {
 
   async function handleSubmit(e: any) {
     e.preventDefault();
-    let url = `${env.API_URL}/api/users`;
+    let url = `${env.API_URL}/users`;
 
     const user = {
       email: email,
       username: displayName,
       password: password,
     };
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
-    });
-
-    const data = await response.json();
-    if (response.status === 201) {
-      console.log("authorized");
-      window.location.href = "/login";
+    if (password !== verifyPassword) {
+      setPasswordError(true)
+      console.log("passwords must match")
     } else {
-      console.log("Unauthorized");
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      });
+
+      const data = await response.json();
+     switch(response.status) {
+      case 201:
+        console.log("authorized");
+        window.location.href = "/login";
+      case 400:
+        console.log("invalid Input")
+      case 422:
+        console.log("email Adress already exists")
+     }
     }
   }
 
   return (
     <div className="flex h-full w-full justify-center items-center">
-      <div className={`w-2/5 md:2/5 sm:3/5 p-8 rounded-3xl ${itemColor}`}>
+      <div className={`w-2/5 md:2/5 sm:3/5 p-8 rounded-3xl shadow-custom`}>
         <h1 className="flex text-2xl justify-center font-bold">
           Chirp Messenger
         </h1>
@@ -52,7 +60,7 @@ export default function Registration() {
                 Email
               </label>
               <input
-                className="w-full border shadow-sm rounded-md p-2 focus:outline-none"
+                className="w-full bg-transparent shadow-custom rounded-md p-2 focus:outline-none"
                 type="email"
                 name="email"
                 id="email"
@@ -66,7 +74,7 @@ export default function Registration() {
                 Display Name
               </label>
               <input
-                className="w-full border shadow-sm rounded-md p-2 focus:outline-none"
+                className="w-full bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none"
                 type="text"
                 name="display_name"
                 id="display_name"
@@ -81,9 +89,8 @@ export default function Registration() {
               Password
             </label>
             <input
-              className={`w-2/5 border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${
-                passwordError ? "border-red-500" : ""
-              }`}
+              className={`w-2/5 bg-transparent shadow-custom rounded-md p-2 mb-4 focus:outline-none ${passwordError ? "border-2 border-red-500" : ""
+                }`}
               type="password"
               name="password"
               id="password"
@@ -95,9 +102,8 @@ export default function Registration() {
               Verify Password
             </label>
             <input
-              className={`w-2/5 border shadow-sm rounded-md p-2 mb-12 focus:outline-none ${
-                passwordError ? "border-red-500" : ""
-              }`}
+              className={`w-2/5 bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${passwordError ? "border-2 border-red-500" : ""
+                }`}
               type="password"
               name="verify_password"
               id="verify_password"
@@ -107,7 +113,7 @@ export default function Registration() {
             />
           </div>
           <button
-            className="w-full bg-blue-500 hover:bg-[#034d61] text-white p-3 rounded-md"
+            className="w-full bg-transparent shadow-custom hover:shadow-none hover:bg-[#034d61] text-white p-3 rounded-md"
             type="submit"
           >
             Sign Up
