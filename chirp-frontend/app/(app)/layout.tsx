@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { bgColor, itemColor, textColor } from "../layout";
+import { bgColor, itemColor, textColor, textaccent } from "../layout";
 import { session } from "@/components/auth.component"
 import { LoadingScreen } from "@/components/loading.component";
 
@@ -18,13 +18,13 @@ export default function RootLayout({
     window.location.href = "/"
   }
 
-//if (loading) {
-//  return (
-//    <div>
-//      <LoadingScreen />
-//    </div>
-//  )
-//}
+  //if (loading) {
+  //  return (
+  //    <div>
+  //      <LoadingScreen />
+  //    </div>
+  //  )
+  //}
 
   if (!session.auth.isAuthenticated(session.user, session.config)) {
     window.location.href = "/login"
@@ -62,12 +62,13 @@ export default function RootLayout({
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src={session.user.data?.avatar} className="w-16 cursor-pointer" onClick={() => window.location.href = "/settings"}/>
-              <p className="cursor-pointer" onClick={() => window.location.href = "/settings"}>{session.user.data?.username}</p>
+              <img src={session.user.data?.avatar} className="w-16 cursor-pointer" onClick={() => window.location.href = "/settings"} />
+              <div className="flex flex-col"><p className="cursor-pointer" onClick={() => window.location.href = "/settings"}>{session.user.data?.username}</p>
+                <p className={`text-xs ${textaccent}`}>{session.user.data?.id}</p></div>
             </div>
           </div>
         </div>
-          {children}
+        {children}
       </div>
     );
   }

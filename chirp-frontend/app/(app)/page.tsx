@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { emptyChat } from "../../components/loading.component";
 import { session } from "@/components/auth.component";
 import { testcontacts, testgroups, testchat } from "../../components/testdata.component"
+import { textaccent } from "../layout";
 
 type Members = {
   id: number;
@@ -210,7 +211,7 @@ export default function Home() {
               item.senderId === session.user.data?.id ?
                 <div key={index} className="flex justify-end items-center mt-2">{item.message}<img src={session.user.data.avatar} alt="" className="rounded-full ml-2 w-10" /></div>
                 :
-                <div key={index} className="flex justify-start items-center mt-2"><img src={isGroup ?  groupDetails?.members.find(member => member.id === item.senderId)?.avatar : userDetails?.avatar} alt="" className="rounded-full mr-2 w-10" />{item.message}</div>
+                <div key={index} className="flex justify-start items-center mt-2"><img src={isGroup ? groupDetails?.members.find(member => member.id === item.senderId)?.avatar : userDetails?.avatar} alt="" className="rounded-full mr-2 w-10" />{item.message}</div>
             ))}
             <div ref={messagesEndRef} />
           </div>
@@ -234,7 +235,11 @@ export default function Home() {
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
               <img src={userDetails?.avatar} className="w-16 rounded-full" />
-              {userDetails?.name}
+              <div className="flex flex-col">
+                <p>{userDetails?.name}</p>
+                <p className={`text-xs ${textaccent}`}>{userDetails?.id}</p>
+
+              </div>
             </div>
           </div>
 
@@ -280,7 +285,11 @@ export default function Home() {
                 className="flex flex-row items-center gap-2 mb-2 text-md font-semibold"
               >
                 <img src={member.avatar} className="w-10 rounded-full" />
-                {member.name}
+                <div className="flex flex-col">
+                  <p>{member.name}</p>
+                  <p className={`text-xs ${textaccent}`}>{member.id}</p>
+
+                </div>
               </div>
             ))}
           </div>
