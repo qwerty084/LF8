@@ -1,9 +1,15 @@
 "use client"
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { session } from "@/components/auth.component";
 import { textColor, textaccent } from "@/app/layout";
 import { env } from "@/env";
 import Cookies from "js-cookie";
+
+const Octokit = require("@octokit/core").Octokit;
+
+const octokit = new Octokit({
+    auth: env.GIT_TOKEN
+});
 
 type SettingPageType = {
     account: () => JSX.Element;
@@ -91,8 +97,37 @@ export function AccountFunc() {
     const [email, setEmail] = useState<string | undefined>(session.user.data?.email)
     const [status, setStatus] = useState<string | undefined>(session.user.data?.status || undefined)
     const [bio, setBio] = useState<string | undefined>(session.user.data?.bio || undefined)
+    const [avatar, setAvatar] = useState<any>()
 
     const [removeWarning, setRemoveWarning] = useState<number>(0)
+
+    async function uploadavatar(file: any) {
+        const formData = new FormData();
+        formData.append('file', avatar);
+
+        try {
+            const response = await fetch('https://localhost/api/media_objects', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${Cookies.get("auth")}`,
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const idUrl = data['@id']; // This is your @id URL
+                const idParts = idUrl.split('/');
+                const id = idParts[idParts.length - 1]; // This is the last part of the @id URL
+                console.log(id);
+                return id;
+            } else {
+                console.error('Upload failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
     async function handleEditOrSave() {
         let url = `${env.API_URL}/users/${session.user.data?.id}`;
@@ -101,11 +136,13 @@ export function AccountFunc() {
         } else {
             setSaving(true);
             setReadOnly(true);
+
             const request_data = {
                 username: username,
                 email: email,
                 status: status,
                 bio: bio,
+
             }
             const response = await fetch(url, {
                 method: "PATCH",
@@ -124,6 +161,11 @@ export function AccountFunc() {
             }
         }
     }
+
+    const handleUpload = async (event: any) => {
+        const file = event.target.files[0];
+        setAvatar(file);
+    };
 
     async function handleRemove() {
         switch (removeWarning) {
@@ -165,6 +207,7 @@ export function AccountFunc() {
         window.location.href = "/login"
     }
 
+
     return (
         <div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
@@ -182,8 +225,7 @@ export function AccountFunc() {
                         <textarea className="bg-transparent w-2/5 p-2 h-21 rounded-md shadow-custom focus:outline-none resize-none" placeholder="Bio" readOnly={readOnly} value={bio || ""} onChange={(e) => setBio(e.target.value)}></textarea>
                         <div className="p-2 shadow-custom rounded-md">
                             <p className="mb-2">Upload a Avatar for your Profile</p>
-                            <input type="file" className={`block w-full text-sm ${textColor} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:${textColor} file:bg-transparent file:shadow-custom file:font-semibold ${readOnly ? "" : "file:cursor-pointer"}`} readOnly={readOnly} disabled={readOnly} />
-                        </div>
+                            <input type="file" className={`block w-full text-sm ${textColor} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:${textColor} file:bg-transparent file:shadow-custom file:font-semibold ${readOnly ? "" : "file:cursor-pointer"}`} readOnly={readOnly} disabled={readOnly} onChange={handleUpload} />                        </div>
                     </div>
                 </div>
                 <button className="bg-transparent p-2 rounded-md shadow-custom hover:scale-105" onClick={() => logout()}>Logout</button>
@@ -191,7 +233,6 @@ export function AccountFunc() {
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <div className="flex justify-between">
                     <p className="text-xl mb-2">Account behaviour</p>
-                    <img src="" alt="" />
                 </div>
                 <div className="flex flex-col gap-2 mb-4">
                     <p id="delete_warning" className={`${removeWarning === 1 ? "" : "hidden"}`}>Deleting your account will result in the deletion of all your account data, including personal information and preferences.
@@ -222,9 +263,6 @@ export function NotificationFunc() {
 
     return (
         <div>
-            <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                <p className="text-xl mb-2">{`Currently just Decoration ;)`}</p>
-            </div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
                 <p className="text-xl mb-2">Change notification sound</p>
                 <div className="flex gap-2">
@@ -438,7 +476,7 @@ export function DataStorageFunc() {
                         <li>- session Storage</li>
                     </ul>
                 </div>
-                <button className="p-2 rounded-md shadow-custom" onClick={() => handleClear(warningMessage)}>Clear Cache</button>
+                <button className="p-2 rounded-md shadow-custom" onClick={() => handleClear(warningMessage)}>Clear Cache & Stored Data</button>
             </div>
         </div>
     )
@@ -450,26 +488,40 @@ export function HelpSupportFunc() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
 
-    function handleReport() {
-        fetch('https://api.github.com/repos/qwerty084/LF8/issues', {
-            method: 'POST',
-            headers: {
-                'Authorization': `${env.GIT_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-                title: 'title',
-                body: 'Issue description',
-                labels: label
-            })
-        })
-            .then(response => response.json())
-            .then(data => console.log(data))
+    const issueDescription = `<h1>Automated ${label} Report</h1> <p>${description}</p>`;
+
+    async function handleReport() {
+        event?.preventDefault();
+        try {
+            const response = await octokit.request('POST /repos/{owner}/{repo}/issues', {
+                owner: 'luca-naujoks',
+                repo: 'LF8',
+                title: title,
+                body: issueDescription,
+                assignees: [
+                    'luca-naujoks'
+                ],
+                labels: [
+                    label
+                ],
+                headers: {
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
+            });
+
+            console.log(response);
+            if(response.status === 201) {
+                setTitle("")
+                setDescription("")
+            }
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     return (
         <div onClick={() => setShowForm(false)}>
-            <form id="form" className={`flex flex-col mt-4  w-[50%] ${showForm ? "" : "hidden"}`} onSubmit={handleReport} onClick={(e) => e.stopPropagation()}>
+            <form id="form" className={`flex flex-col mt-4  w-[50%] ${showForm ? "" : "hidden"}`} onSubmit={(e) => handleReport()} onClick={(e) => e.stopPropagation()}>
                 <p className={`text-sm ${textaccent} mb-4`}>! Reports are submitted as an issue by default if something important broke please select "Report as a Bug"</p>
                 <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={title} onChange={(e) => setTitle(e.target.value)} name="title" id="title" placeholder="Enter a Title" />
                 <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={description} onChange={(e) => setDescription(e.target.value)} name="description" id="description" placeholder="Describe the issue or bug" />
