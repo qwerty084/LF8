@@ -1,7 +1,9 @@
 export const env = {
 //auth
   API_URL: "https://localhost/api",
-  GIT_TOKEN: "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",
+
+
+  WS_URL: "http://localhost:3003",
 
 //Maping Items
   GIT_LABELS: ["issue", "bug"],
