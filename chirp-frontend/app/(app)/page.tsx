@@ -3,7 +3,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { emptyChat } from "../../components/loading.component";
 import { session } from "@/components/auth.component";
 import { testcontacts, testgroups, testchat } from "../../components/testdata.component"
-import { textaccent } from "../layout";
+import { getTheme } from "../layout";
+import { CreateChat } from "@/components/chat.component";
+import { io } from "socket.io-client";
+import { env } from "@/env";
+
+const { bgColor, itemColor, textColor, textaccent } = getTheme();
 
 type Members = {
   id: number;
@@ -52,6 +57,14 @@ interface chatType {
   message: string;
 }
 
+interface messageStorage {
+  roomId: string;
+  messages: {
+    userId: number
+    message: string
+  }
+}
+
 export default function Home() {
 
   const [groups, setGroups] = useState<GroupType[]>([]);
@@ -62,6 +75,8 @@ export default function Home() {
   const [isGroup, setIsGroup] = useState<boolean | null>(null);
   const [userDetails, setUserDetails] = useState<userDetails>();
   const [groupDetails, setGroupDetails] = useState<groupDetails>();
+
+  const [createChat, setCreateChat] = useState<string | null>(null)
 
   const defaultUser = {
     id: 0,
@@ -86,6 +101,17 @@ export default function Home() {
   function get_groups_and_chats() {
     setGroups(testgroups);
     setContacts(testcontacts);
+  }
+
+  function joinRoom(roomId: string) {
+    const socket = io(env.WS_URL)
+    //Join a Ws Room
+    socket.emit('joinRoom', roomId)
+
+    //add an eventlistener for this room
+    socket.on(roomId, ({roomId, userId, message}) => {
+
+    })
   }
 
   function select_group(id: any) {
@@ -115,6 +141,7 @@ export default function Home() {
   }
 
   function select_chat(id: any) {
+    const socket = io('http://localhost:3000');
     if (id === userDetails?.id) {
       setIsGroup(null)
       setChat(null)
@@ -130,10 +157,16 @@ export default function Home() {
         messagescore: 12,
         createdAt: "2023-12-17",
       });
+      setCreateChat(null)
       setIsGroup(false);
       setChat(testchat);
     }
   }
+
+  function handleCreateChat(type: string | null) {
+    	setCreateChat(type)
+  }
+
   {/* Use senderId only for local messages. the backend should get the sender id of an verifyed JWT to secure the right id */ }
   function send_message(senderId: number, message: string) {
     // Create a new message object
@@ -183,12 +216,25 @@ export default function Home() {
             />
           </div>
         ))}
+        <div onClick={() => handleCreateChat("group")} className="w-full flex justify-center cursor-pointer py-1 mt-4 hover:scale-105">
+        <img
+              src="/assets/create.png"
+              alt="Create"
+              className="flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl"
+            />
+        </div>
         <div className="flex items-end justify-center h-full mb-4">
           <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110" onClick={() => window.location.href = "/settings"} />
         </div>
       </div>
       {/* Contact Map Function */}
       <div className="flex flex-col justify-items-start w-1/6">
+      <div
+            onClick={() => handleCreateChat("contact")}
+            className="flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none justify-center"
+          >
+            <p className="flex items-center text-xl">Add a Friend</p>
+          </div>
         {contacts.map((contact: any) => (
           <div
             key={contact.id}
@@ -205,7 +251,7 @@ export default function Home() {
       </div>
       {/* Chat div with input controls */}
       <div className="flex flex-grow justify-between shadow-custom">
-        <div className="flex flex-col w-[100%] h-[100%] mx-4">
+        {createChat === null ? <div className="flex flex-col w-[100%] h-[100%] mx-4">
           <div id="chatMessages" className="h-[80vh] overflow-y-auto scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-100">
             {!chat ? emptyChat() : chat?.map((item, index) => (
               item.senderId === session.user.data?.id ?
@@ -224,6 +270,8 @@ export default function Home() {
             <img src="assets/send.png" id="send" className="w-10 h-10 text-xl cursor-pointer" onClick={() => session.user.data && session.user.data.id && send_message(session.user.data?.id, message)} />
           </div>
         </div>
+          :
+          <CreateChat chatType={createChat} />}
         <div
           id="userDetails"
           className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${session.config.data?.chat?.details === true && isGroup === false ? "" : "hidden"

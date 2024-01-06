@@ -1,10 +1,11 @@
 "use client"
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { session } from "@/components/auth.component";
-import { textColor, textaccent } from "@/app/layout";
+import { getTheme } from "@/app/layout";
 import { env } from "@/env";
 import Cookies from "js-cookie";
 
+const { bgColor, itemColor, textColor, textaccent } = getTheme();
 const Octokit = require("@octokit/core").Octokit;
 
 const octokit = new Octokit({
@@ -142,7 +143,6 @@ export function AccountFunc() {
                 email: email,
                 status: status,
                 bio: bio,
-
             }
             const response = await fetch(url, {
                 method: "PATCH",
@@ -302,7 +302,7 @@ export function ChatSettingsFunc() {
     return (
         <div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                <p className="text-xl mb-2">Change CHIRP themes</p>
+                <p className="text-xl mb-2">Change CHIRP themes <span className={textaccent}>//currently not working</span></p>
                 <div className="flex gap-2">
                     {themes.map((item, index) => (
                         <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${selectedTheme === item ? "" : "hover:scale-105"} ${selectedTheme === item ? textaccent : ""}`} disabled={selectedTheme === item} onClick={() => themeFunc(item)}>{item}</button>

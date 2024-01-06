@@ -1,8 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import { bgColor, itemColor, textColor, textaccent } from "../layout";
+import { getTheme } from "../layout";
 import { session } from "@/components/auth.component"
 import { LoadingScreen } from "@/components/loading.component";
+
+const { bgColor, itemColor, textColor, textaccent } = getTheme();
 
 export default function RootLayout({
   children,
