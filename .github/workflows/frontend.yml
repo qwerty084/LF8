@@ -1,0 +1,30 @@
+name: Frontend tests
+on: 
+  pull_request:
+    branches: main
+  workflow_dispatch:
+
+jobs: 
+  tests:
+    strategy:
+      matrix:
+        version: [18, 20]
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+  
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 18 and 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.version }}
+          
+      - name: Install npm
+        run: npm install -y
+        
+      - name: Run npm lint
+        run: npm run lint
+        
+      - name: Build
+        run: npm run build
