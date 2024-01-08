@@ -18,7 +18,8 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[Vich\Uploadable]
 #[ORM\Entity]
 #[ApiResource(
-    normalizationContext: ['groups' => ['media_object:read']],
+    normalizationContext: ['groups' => ['media_object', 'media_object:read']],
+    denormalizationContext: ['groups' => ['media_object:write', 'media_object:create', 'media_object:update']],
     types: ['https://schema.org/MediaObject'],
     operations: [
         new Get(),
@@ -50,6 +51,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 class MediaObject
 {
     #[ORM\Id, ORM\Column, ORM\GeneratedValue]
+    #[Groups(['media_object'])]
     private ?int $id = null;
 
     #[ApiProperty(types: ['https://schema.org/contentUrl'])]

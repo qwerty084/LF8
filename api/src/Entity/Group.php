@@ -34,12 +34,14 @@ class Group
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['group', 'group:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    #[SerializedName("name")]
     private ?string $groupName = null;
-    
+
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'groups')]
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     #[SerializedName('members')]
@@ -50,7 +52,11 @@ class Group
     #[ApiProperty(types: ['https://schema.org/image'])]
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     private ?MediaObject $avatar = null;
-    
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    private ?string $description = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -108,6 +114,18 @@ class Group
     public function setAvatar(?MediaObject $avatar): static
     {
         $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }

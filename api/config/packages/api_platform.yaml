@@ -4,7 +4,6 @@ api_platform:
     # Mercure integration, remove if unwanted
     mercure: ~
     formats:
-        jsonld: ["application/ld+json"]
         json: ["application/json"]
     docs_formats:
         jsonld: ["application/ld+json"]
