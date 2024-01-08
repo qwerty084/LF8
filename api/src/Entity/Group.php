@@ -7,20 +7,27 @@ use App\Repository\GroupRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\ApiProperty;
 
 
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
 #[ORM\Table(name: '`group`')]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['group']],
+    denormalizationContext: ['groups' => ['group:create', 'group:update', 'group:write']],
+)]
 #[ApiResource(
     uriTemplate: "/groups/{userId}/users",
     uriVariables: [
         'userId' => new Link(fromClass: User::class, toProperty: 'users'),
     ],
-    operations: [ new GetCollection() ]
+    operations: [ new GetCollection() ],
+    normalizationContext: ['groups' => ['group']],
+    denormalizationContext: ['groups' => ['group:create', 'group:update', 'group:write']]
 )]
 class Group
 {
@@ -30,11 +37,19 @@ class Group
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     private ?string $groupName = null;
-
+    
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'groups')]
+    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     #[SerializedName('members')]
     private Collection $users;
+
+    #[ORM\OneToOne(targetEntity: MediaObject::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
+    #[ApiProperty(types: ['https://schema.org/image'])]
+    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    private ?MediaObject $avatar = null;
     
     public function __construct()
     {
@@ -81,6 +96,18 @@ class Group
         if ($this->users->removeElement($user)) {
             $user->removeGroup($this);
         }
+
+        return $this;
+    }
+
+    public function getAvatar(): ?MediaObject
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?MediaObject $avatar): static
+    {
+        $this->avatar = $avatar;
 
         return $this;
     }

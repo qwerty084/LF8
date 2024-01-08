@@ -61,7 +61,7 @@ class MediaObject
     public ?File $file = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['media_object:read', 'user'])]
+    #[Groups(['media_object:read', 'user', 'group'])]
     private ?string $filePath = null;
 
     public function getId(): ?int
