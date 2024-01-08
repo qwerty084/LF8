@@ -41,7 +41,7 @@ class Group
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     #[SerializedName("name")]
     private ?string $groupName = null;
-
+    
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'groups')]
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     #[SerializedName('members')]
@@ -56,7 +56,7 @@ class Group
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     private ?string $description = null;
-
+    
     public function __construct()
     {
         $this->users = new ArrayCollection();
