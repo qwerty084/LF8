@@ -81,13 +81,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private ?string $bio = null;
-    
+
     #[ORM\ManyToOne(targetEntity: MediaObject::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
     #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     public ?MediaObject $image = null;
-    
+
     #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'users')]
     #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private Collection $groups;
@@ -261,5 +261,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->groups->removeElement($group);
 
         return $this;
+    }
+
+    public function getImage(): ?MediaObject
+    {
+        return $this->image;
     }
 }
