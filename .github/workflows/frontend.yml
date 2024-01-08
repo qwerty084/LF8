@@ -11,6 +11,9 @@ jobs:
         version: [18, 20]
         os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./chirp-frontend
   
 
     steps:
