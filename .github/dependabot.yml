@@ -1,8 +1,17 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "./chirp-frontend"
-    schedule:
-      interval: "daily"
-    ignore:
-          update-types: ["version-update:semver-patch"]
+    - package-ecosystem: "npm"
+        directory: "./chirp-frontend"
+        schedule:
+            interval: "daily"
+        ignore:
+            dependency-name: "*"
+            update-types: ["version-update:semver-patch"]
+
+    - package-ecosystem: "composer"
+        directory: "./api"
+        schedule:
+            interval: "daily"
+        ignore:
+            dependency-name: "*"
+            update-types: ["version-update:semver-minor"]
