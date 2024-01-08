@@ -7,10 +7,21 @@ use App\Repository\GroupRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\SerializedName;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+
 
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
 #[ORM\Table(name: '`group`')]
 #[ApiResource]
+#[ApiResource(
+    uriTemplate: "/groups/{userId}/users",
+    uriVariables: [
+        'userId' => new Link(fromClass: User::class, toProperty: 'users'),
+    ],
+    operations: [ new GetCollection() ]
+)]
 class Group
 {
     #[ORM\Id]
@@ -22,8 +33,9 @@ class Group
     private ?string $groupName = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'groups')]
+    #[SerializedName('members')]
     private Collection $users;
-
+    
     public function __construct()
     {
         $this->users = new ArrayCollection();

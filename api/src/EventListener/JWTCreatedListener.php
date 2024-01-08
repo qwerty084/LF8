@@ -34,7 +34,7 @@ class JWTCreatedListener
             "status" => $user->getStatus(),
             "bio" => $user->getBio(),
             "ip" => $request->getClientIp(),
-            "avatar" => $user->getImage()->getFilePath(),
+            "avatar" => $user->getImage()?->getFilePath(),
         ];
 
         $event->setData($payload);
