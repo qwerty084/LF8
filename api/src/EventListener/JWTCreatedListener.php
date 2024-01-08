@@ -5,6 +5,7 @@ namespace App\EventListener;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\User;
 
 class JWTCreatedListener
 {
@@ -33,6 +34,7 @@ class JWTCreatedListener
             "status" => $user->getStatus(),
             "bio" => $user->getBio(),
             "ip" => $request->getClientIp(),
+            "avatar" => $user->getImage()->getFilePath(),
         ];
 
         $event->setData($payload);
