@@ -29,6 +29,10 @@ jobs:
   build-push-docker:
 
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./api
         
     permissions:
       contents: read
