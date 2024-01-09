@@ -40,7 +40,7 @@ use ApiPlatform\Metadata\ApiProperty;
 #[UniqueEntity('email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'group'])]
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
@@ -57,7 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     #[Assert\NotBlank]
-    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
+    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read', 'group'])]
     private ?string $username = null;
 
     #[ORM\Column(type: "datetime", nullable: false, options: ["default" => "CURRENT_TIMESTAMP"])]
@@ -283,6 +283,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->image;
     }
 
+    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    #[SerializedName('avatar')]
+    public function getAvatarPath(): ?string
+    {
+        return $this->image?->getFilePath();
+    }
     /**
      * @return Collection<int, Meet>
      */

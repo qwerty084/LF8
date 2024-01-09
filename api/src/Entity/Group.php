@@ -25,7 +25,7 @@ use ApiPlatform\Metadata\ApiProperty;
     uriVariables: [
         'userId' => new Link(fromClass: User::class, toProperty: 'users'),
     ],
-    operations: [ new GetCollection() ],
+    operations: [new GetCollection()],
     normalizationContext: ['groups' => ['group']],
     denormalizationContext: ['groups' => ['group:create', 'group:update', 'group:write']]
 )]
@@ -41,7 +41,7 @@ class Group
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     #[SerializedName("name")]
     private ?string $groupName = null;
-    
+
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'groups')]
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     #[SerializedName('members')]
@@ -56,7 +56,7 @@ class Group
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     private ?string $description = null;
-    
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -117,7 +117,6 @@ class Group
     {
         return $this->avatar?->getFilePath();
     }
-
 
     public function setAvatar(?MediaObject $avatar): static
     {
