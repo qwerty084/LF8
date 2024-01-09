@@ -92,10 +92,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private Collection $groups;
 
+    #[ORM\ManyToMany(targetEntity: Meet::class, mappedBy: 'participants')]
+    private Collection $meets;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->groups = new ArrayCollection();
+        $this->meets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -247,6 +251,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->groups;
     }
 
+    public function getGroupsArr(): array
+    {
+        $output = [];
+
+        foreach ($this->groups as $group) {
+            $output[] = $group->getId();
+        }
+
+        return $output;
+    }
+
     public function addGroup(Group $group): static
     {
         if (!$this->groups->contains($group)) {
@@ -266,5 +281,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getImage(): ?MediaObject
     {
         return $this->image;
+    }
+
+    /**
+     * @return Collection<int, Meet>
+     */
+    public function getMeets(): Collection
+    {
+        return $this->meets;
+    }
+
+    public function addMeet(Meet $meet): static
+    {
+        if (!$this->meets->contains($meet)) {
+            $this->meets->add($meet);
+            $meet->addParticipant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMeet(Meet $meet): static
+    {
+        if ($this->meets->removeElement($meet)) {
+            $meet->removeParticipant($this);
+        }
+
+        return $this;
     }
 }

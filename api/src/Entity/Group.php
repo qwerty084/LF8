@@ -111,6 +111,14 @@ class Group
         return $this->avatar;
     }
 
+    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    #[SerializedName('avatar')]
+    public function getAvatarPath(): ?string
+    {
+        return $this->avatar?->getFilePath();
+    }
+
+
     public function setAvatar(?MediaObject $avatar): static
     {
         $this->avatar = $avatar;
