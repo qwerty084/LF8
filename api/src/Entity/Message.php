@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 #[ApiResource]
 #[ApiResource(
-    uriTemplate: "/message/{groupId}/groups",
+    uriTemplate: "/messages/{groupId}/groups",
     uriVariables: [
         'groupId' => new Link(fromClass: Group::class, toProperty: 'chatGroup'),
     ],
@@ -42,7 +42,6 @@ class Message
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['message', 'message:create', 'message:write', 'message:update', 'message:read'])]
     private ?User $sender = null;
 
     public function getId(): ?int

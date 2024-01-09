@@ -89,7 +89,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public ?MediaObject $image = null;
 
     #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'users')]
-    #[Groups(['user', 'user:create', 'user:write', 'user:update', 'user:read'])]
     private Collection $groups;
 
     #[ORM\ManyToMany(targetEntity: Meet::class, mappedBy: 'participants')]

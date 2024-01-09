@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\ApiProperty;
-
+use Symfony\Component\Serializer\Attribute\SerializedName as AttributeSerializedName;
 
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
 #[ORM\Table(name: '`group`')]
@@ -50,7 +50,6 @@ class Group
     #[ORM\OneToOne(targetEntity: MediaObject::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
-    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     private ?MediaObject $avatar = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -97,6 +96,13 @@ class Group
         return $this;
     }
 
+    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    #[SerializedName("avatarPath")]
+    public function getAvatarPath(): ?string
+    {
+        return $this->avatar?->getFilePath();
+    }
+
     public function removeUser(User $user): static
     {
         if ($this->users->removeElement($user)) {
@@ -108,7 +114,7 @@ class Group
 
     public function getAvatar(): ?MediaObject
     {
-        return $this->avatar;
+        return $this->avatar->getFilePath();
     }
 
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
