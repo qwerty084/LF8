@@ -35,7 +35,7 @@ export default function RootLayout({
       <div className={`flex flex-col h-screen w-screen ${bgColor} ${textColor}`}>
         <div id="header" className="flex flex-row w-full">
           <div className="w-24 h-24 shadow-custom">
-            <img src="assets/chirp_logo.png" className="cursor-pointer" onClick={() => chats()} />
+            <img alt="chirp" src="assets/chirp_logo.png" className="cursor-pointer" onClick={() => chats()} />
           </div>
           <div className="flex justify-center items-center w-1/6 h-24 ">
             <input
@@ -50,11 +50,13 @@ export default function RootLayout({
           <div className="flex justify-end flex-grow pr-2 h-24 gap-4 shadow-custom">
             <div id="modules" className="flex gap-4 pt-4">
               <img
+                alt="chats"
                 src="assets/chat_bubble.png"
                 className="w-10 h-10 cursor-pointer"
                 onClick={() => chats()}
               />
               <img
+                alt="meet and Greet"
                 src="assets/meet&greet.png"
                 className="w-10 h-10 cursor-pointer"
                 onClick={() => meetandgreet()}

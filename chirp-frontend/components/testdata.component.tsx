@@ -9,8 +9,8 @@ export const testgroups = [
     { id: 1, name: "Group 1", avatar: "assets/group_red.png" },
     { id: 2, name: "Group 2", avatar: "assets/group_purple.png" },
     { id: 3, name: "Group 3", avatar: "assets/group_green.png" },
-    { id: 1, name: "Group 1", avatar: "assets/group_red.png" },
-    { id: 2, name: "Group 2", avatar: "assets/group_purple.png" },
+    { id: 4, name: "Group 1", avatar: "assets/group_red.png" },
+    { id: 5, name: "Group 2", avatar: "assets/group_purple.png" },
 
 ]
 

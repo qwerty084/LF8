@@ -302,7 +302,7 @@ export function ChatSettingsFunc() {
     return (
         <div>
             <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
-                <p className="text-xl mb-2">Change CHIRP themes <span className={textaccent}>//currently not working</span></p>
+                <p className="text-xl mb-2">Change CHIRP themes</p>
                 <div className="flex gap-2">
                     {themes.map((item, index) => (
                         <button key={index} className={`bg-transparent p-2 rounded-md shadow-custom ${selectedTheme === item ? "" : "hover:scale-105"} ${selectedTheme === item ? textaccent : ""}`} disabled={selectedTheme === item} onClick={() => themeFunc(item)}>{item}</button>
@@ -522,7 +522,7 @@ export function HelpSupportFunc() {
     return (
         <div onClick={() => setShowForm(false)}>
             <form id="form" className={`flex flex-col mt-4  w-[50%] ${showForm ? "" : "hidden"}`} onSubmit={(e) => handleReport()} onClick={(e) => e.stopPropagation()}>
-                <p className={`text-sm ${textaccent} mb-4`}>! Reports are submitted as an issue by default if something important broke please select "Report as a Bug"</p>
+                <p className={`text-sm ${textaccent} mb-4`}>! Reports are submitted as an issue by default if something important broke please select &quot;Report as a Bug&quot;</p>
                 <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={title} onChange={(e) => setTitle(e.target.value)} name="title" id="title" placeholder="Enter a Title" />
                 <input type="text" className="bg-transparent p-2 shadow-custom rounded-md focus:outline-none mb-2" value={description} onChange={(e) => setDescription(e.target.value)} name="description" id="description" placeholder="Describe the issue or bug" />
                 <div className="flex gap-4 mb-2">

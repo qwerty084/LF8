@@ -10,13 +10,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [theme, setTheme] = useState(localStorage.getItem('config.chat.theme') || 'dark');
+  const [theme, setTheme] = useState("dark");
   
-  const isDarkMode = theme === 'dark';
-  const textColor = isDarkMode ? "text-[#00cba2]" : "text-black";
-  const textaccent = isDarkMode ? "text-[#8d8d8d]" : "#00cba2";
-  const bgColor = isDarkMode ? "bg-[#01242d]" : "bg-[#d9d9d9]";
-  const itemColor = isDarkMode ? "bg-[#636363]" : "bg-[#034d61]";
+  const textColor = theme === "dark" ? "text-[#00cba2]" : "text-black";
+  const textaccent = theme === "dark" ? "text-[#8d8d8d]" : "#00cba2";
+  const bgColor = theme === "dark" ? "bg-[#01242d]" : "bg-[#d9d9d9]";
+  const itemColor = theme === "dark" ? "bg-[#636363]" : "bg-[#034d61]";
 
   useEffect(() => {
     localStorage.setItem('config.chat.theme', theme);
@@ -32,7 +31,8 @@ export default function RootLayout({
 }
 
 export function getTheme() {
-  const theme = localStorage.getItem('config.chat.theme') || 'dark';
+  
+  const theme = "dark";
   const isDarkMode = theme === 'dark';
   return {
     textColor: isDarkMode ? "text-[#00cba2]" : "text-black",

@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { itemColor } from "../../layout";
 import { env } from "../../../env"
 import { session } from "../../../components/auth.component"
 
@@ -83,7 +82,7 @@ export default function Login() {
               Forgot your Password?
             </a>
             <p>
-              <span>Don't have an Account? </span>
+              <span>{`Don't have an Account? `}</span>
               <a className="text-blue-500" href="/register">
                 Sign Up here.
               </a>

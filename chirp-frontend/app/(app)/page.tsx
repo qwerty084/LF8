@@ -34,10 +34,6 @@ interface userDetails {
   avatar: string;
   status: string;
   bio: string;
-
-  //other details
-  messagescore: number;
-  createdAt: string;
 }
 
 interface groupDetails {
@@ -46,10 +42,6 @@ interface groupDetails {
   avatar: string;
   members: Members[];
   description: string;
-
-  //group details
-  messages: number;
-  createdAt: string;
 }
 
 interface chatType {
@@ -76,7 +68,9 @@ export default function Home() {
   const [userDetails, setUserDetails] = useState<userDetails>();
   const [groupDetails, setGroupDetails] = useState<groupDetails>();
 
-  const [createChat, setCreateChat] = useState<string | null>(null)
+  const [createChat, setCreateChat] = useState<string | null>("group")
+
+  const [selectedChat, setSelectedChat] = useState<number | null>(null)
 
   const defaultUser = {
     id: 0,
@@ -109,7 +103,7 @@ export default function Home() {
     socket.emit('joinRoom', roomId)
 
     //add an eventlistener for this room
-    socket.on(roomId, ({roomId, userId, message}) => {
+    socket.on(roomId, ({ roomId, userId, message }) => {
 
     })
   }
@@ -118,6 +112,7 @@ export default function Home() {
     if (id === groupDetails?.id) {
       setIsGroup(null)
       setChat(null)
+      setSelectedChat(null)
       setGroupDetails(defaultGroup)
     } else {
       //fetch groupchat data
@@ -132,19 +127,18 @@ export default function Home() {
           { id: 4, name: "Jasmin", avatar: "assets/pfp4.webp" },
         ],
         description: "First Test Group",
-        messages: 122,
-        createdAt: "2023-12-17",
       });
       setIsGroup(true);
+      setSelectedChat(id)
       setChat(testchat);
     }
   }
 
   function select_chat(id: any) {
-    const socket = io('http://localhost:3000');
     if (id === userDetails?.id) {
       setIsGroup(null)
       setChat(null)
+      setSelectedChat(null)
       setUserDetails(defaultUser)
     } else {
       //fetch user data
@@ -154,21 +148,23 @@ export default function Home() {
         avatar: "assets/pfp5.JPG",
         status: "hey i use Chirp",
         bio: "JUNGE bin ich dumm...",
-        messagescore: 12,
-        createdAt: "2023-12-17",
       });
       setCreateChat(null)
       setIsGroup(false);
+      setSelectedChat(id)
       setChat(testchat);
     }
   }
 
   function handleCreateChat(type: string | null) {
-    	setCreateChat(type)
+    setCreateChat(type)
   }
 
   {/* Use senderId only for local messages. the backend should get the sender id of an verifyed JWT to secure the right id */ }
   function send_message(senderId: number, message: string) {
+    if(message === "") {
+      return
+    }
     // Create a new message object
     const newMessage = {
       senderId: senderId,
@@ -212,16 +208,16 @@ export default function Home() {
             <img
               src={group.avatar}
               alt={group.name}
-              className="flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl"
+              className={`flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl ${selectedChat === group.id ? "rounded-num-2xl" : ""}`}
             />
           </div>
         ))}
         <div onClick={() => handleCreateChat("group")} className="w-full flex justify-center cursor-pointer py-1 mt-4 hover:scale-105">
-        <img
-              src="/assets/create.png"
-              alt="Create"
-              className="flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl"
-            />
+          <img
+            src="/assets/create.png"
+            alt="Create"
+            className="flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl"
+          />
         </div>
         <div className="flex items-end justify-center h-full mb-4">
           <img src="/assets/settings.png" alt="" className="w-12 cursor-pointer transition-transform duration-500 ease-in-out transform hover:scale-110" onClick={() => window.location.href = "/settings"} />
@@ -229,19 +225,20 @@ export default function Home() {
       </div>
       {/* Contact Map Function */}
       <div className="flex flex-col justify-items-start w-1/6">
-      <div
-            onClick={() => handleCreateChat("contact")}
-            className="flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none justify-center"
-          >
-            <p className="flex items-center text-xl">Add a Friend</p>
-          </div>
+        <div
+          onClick={() => handleCreateChat("contact")}
+          className={"flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none justify-center"}
+        >
+          <p className="flex items-center text-xl">Add a Friend</p>
+        </div>
         {contacts.map((contact: any) => (
           <div
             key={contact.id}
             onClick={() => select_chat(contact.id)}
-            className="flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none"
+            className={`flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none ${selectedChat === contact.id ? "rounded-r-none shadow-md" : ""}`}
           >
             <img
+              alt="avatar"
               src={contact.avatar}
               className="flex items-center w-14 rounded-full"
             />
@@ -255,9 +252,9 @@ export default function Home() {
           <div id="chatMessages" className="h-[80vh] overflow-y-auto scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-100">
             {!chat ? emptyChat() : chat?.map((item, index) => (
               item.senderId === session.user.data?.id ?
-                <div key={index} className="flex justify-end items-center mt-2">{item.message}<img src={session.user.data.avatar} alt="" className="rounded-full ml-2 w-10" /></div>
+                <div key={index} className="flex justify-end items-center mt-2"><p className="flex pl-2 py-1 items-center rounded-full  shadow-custom">{item.message}<img src={session.user.data.avatar} alt="avatar" className="rounded-full ml-2 w-10" /></p></div>
                 :
-                <div key={index} className="flex justify-start items-center mt-2"><img src={isGroup ? groupDetails?.members.find(member => member.id === item.senderId)?.avatar : userDetails?.avatar} alt="" className="rounded-full mr-2 w-10" />{item.message}</div>
+                <div key={index} className="flex justify-start items-center mt-2"><p className="flex pr-2 py-1 items-center rounded-full  shadow-custom"><img alt="avatar" src={isGroup ? groupDetails?.members.find(member => member.id === item.senderId)?.avatar : userDetails?.avatar} className="rounded-full mr-2 w-10" />{item.message}</p></div>
             ))}
             <div ref={messagesEndRef} />
           </div>
@@ -267,7 +264,7 @@ export default function Home() {
             </label>
             <input type="file" name="upload" id="upload" className="hidden" />
             <input type="text" className="w-full pl-2 text-md rounded-md bg-transparent shadow-custom focus:outline-none" placeholder="Enter your Message" value={message} onChange={(e) => setMessage(e.target.value)} onKeyPress={handleKeyPress} />
-            <img src="assets/send.png" id="send" className="w-10 h-10 text-xl cursor-pointer" onClick={() => session.user.data && session.user.data.id && send_message(session.user.data?.id, message)} />
+            <img alt="avatar" src="assets/send.png" id="send" className="w-10 h-10 text-xl cursor-pointer" onClick={() => session.user.data && session.user.data.id && send_message(session.user.data?.id, message)} />
           </div>
         </div>
           :
@@ -282,7 +279,7 @@ export default function Home() {
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src={userDetails?.avatar} className="w-16 rounded-full" />
+              <img alt="avatar" src={userDetails?.avatar} className="w-16 rounded-full" />
               <div className="flex flex-col">
                 <p>{userDetails?.name}</p>
                 <p className={`text-xs ${textaccent}`}>{userDetails?.id}</p>
@@ -299,14 +296,6 @@ export default function Home() {
           <div id="biography" className="flex flex-col mb-4 min-h-[10%]">
             <span className="font-semibold">Bio: </span>
             <span className="rounded-md h-full">{userDetails?.bio}</span>
-          </div>
-
-          <div id="otherDetails" className="flex flex-col min-h-[50%]">
-            <span className="font-semibold">Other Details: </span>
-            <span className="rounded-md h-full">
-              <p>Message Score: {userDetails?.messagescore}</p>
-              <p>Member since: {userDetails?.createdAt}</p>
-            </span>
           </div>
         </div>
 
@@ -332,7 +321,7 @@ export default function Home() {
                 id="groupMembers"
                 className="flex flex-row items-center gap-2 mb-2 text-md font-semibold"
               >
-                <img src={member.avatar} className="w-10 rounded-full" />
+                <img alt="avatar" src={member.avatar} className="w-10 rounded-full" />
                 <div className="flex flex-col">
                   <p>{member.name}</p>
                   <p className={`text-xs ${textaccent}`}>{member.id}</p>
@@ -346,14 +335,6 @@ export default function Home() {
             <span className="font-semibold">Group Description: </span>
             <span className="rounded-md h-full">
               {groupDetails?.description}
-            </span>
-          </div>
-
-          <div id="otherDetails" className="flex flex-col min-h-[30%]">
-            <span className="font-semibold">Other Details: </span>
-            <span className="rounded-md h-full">
-              <p>Message Score: {groupDetails?.messages}</p>
-              <p>Created At: {groupDetails?.createdAt}</p>
             </span>
           </div>
         </div>
