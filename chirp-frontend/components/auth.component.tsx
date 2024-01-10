@@ -14,6 +14,7 @@ interface UserJwtPayload extends JwtPayload {
     bio: string | null,
     ip: string,
     avatar: string,
+    groups: string[],
     config: {
       theme: string,
       chatDetails: boolean,
@@ -31,6 +32,7 @@ interface UserOject {
   bio: string | null,
   ip: string,
   avatar: string,
+  groups: string[]
 }
 
 interface LocalConfigType {
@@ -90,7 +92,12 @@ export const session = {
         const payload = jwtDecode<UserJwtPayload>(jwt);
 
         //add currently static user propperties
-        payload.user.avatar = "assets/my.png";
+        payload.user.groups = [
+          "/api/groups/1",
+          "/api/groups/2",
+          "/api/groups/3",
+          "/api/groups/4",
+        ]
 
         this.data = payload.user
       } catch (error) {

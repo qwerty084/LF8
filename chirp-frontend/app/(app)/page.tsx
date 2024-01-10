@@ -68,7 +68,7 @@ export default function Home() {
   const [userDetails, setUserDetails] = useState<userDetails>();
   const [groupDetails, setGroupDetails] = useState<groupDetails>();
 
-  const [createChat, setCreateChat] = useState<string | null>("group")
+  const [createChat, setCreateChat] = useState<string | null>(null)
 
   const [selectedChat, setSelectedChat] = useState<number | null>(null)
 
@@ -113,9 +113,14 @@ export default function Home() {
       setIsGroup(null)
       setChat(null)
       setSelectedChat(null)
+      setCreateChat(null)
       setGroupDetails(defaultGroup)
     } else {
+      setCreateChat(null)
       //fetch groupchat data
+      let url = `${env.API_URL}/groups`
+
+
       setGroupDetails({
         id: id,
         name: "Group one",
@@ -139,8 +144,10 @@ export default function Home() {
       setIsGroup(null)
       setChat(null)
       setSelectedChat(null)
+      setCreateChat(null)
       setUserDetails(defaultUser)
     } else {
+      setCreateChat(null)
       //fetch user data
       setUserDetails({
         id: 1,
