@@ -16,6 +16,7 @@ security:
         main:
             stateless: true
             provider: users
+            entry_point: jwt
             json_login:
                 check_path: auth # The name in routes.yaml is enough for mapping
                 username_path: email
@@ -23,11 +24,15 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
             jwt: ~
+            refresh_jwt:
+                check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
 
     access_control:
         - { path: ^/$, roles: PUBLIC_ACCESS } # Allows accessing the Swagger UI
         - { path: ^/api/docs, roles: PUBLIC_ACCESS } # Allows accessing the Swagger UI docs
         - { path: ^/api/users$, methods: [POST], roles: PUBLIC_ACCESS }
+        # - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
+        - { path: ^/api/(login|token/refresh), roles: PUBLIC_ACCESS }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
