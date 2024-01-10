@@ -16,6 +16,10 @@ env:
 jobs:
   build-push-artifact:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+        
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v3"
@@ -36,7 +40,7 @@ jobs:
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build image
-        run: docker build . --file ./api/Dockerfile --force-rm --tag ${{ env.GAR_LOCATION }}chirp-image:latest
+        run: docker build . --file Dockerfile --tag ${{ env.GAR_LOCATION }}chirp-image:latest
         # working-directory: qwerty084/lf8
 
       - name: Push image
