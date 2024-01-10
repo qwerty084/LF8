@@ -111,7 +111,7 @@ class Group
         return $this->avatar;
     }
 
-    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    #[Groups(['group', 'group:read'])]
     #[SerializedName('avatar')]
     public function getAvatarPath(): ?string
     {
