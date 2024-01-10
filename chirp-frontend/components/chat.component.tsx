@@ -45,12 +45,13 @@ function CreateGroup() {
             },
         });
         const data = await response.json();
+        console.log(data)
         if (response.status === 200) {
             console.log(data)
             const groups = data.map((group: { id: any; name: any; avatar: any; }) => ({
                 id: group.id,
                 name: group.name,
-                avatar: group.avatar.filePath
+                avatar: group.avatar
             }));
             console.log(groups)
             setAvaiableGroups(groups)
@@ -62,26 +63,27 @@ function CreateGroup() {
     }
 
     function joinGroup(groupId: number) {
-        let url = `${env.API_URL}/users`
-
-
-        let groups = session.user.data?.groups;
-
+        let url = `${env.API_URL}/users/${session.user.data?.id}`
+      
+        // Map each group id to "/api/groups/id"
+        let groups = session.user.data?.groups?.map(id => `/api/groups/${id}`);
+      
         groups?.push(`/api/groups/${groupId}`);
-
+      
         const request_data = {
-            groups: groups
+          groups: groups
         }
-
+      
+        console.log(request_data)
         const response = fetch(url, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${Cookies.get("auth")}`,
-            },
-            body: JSON.stringify(request_data)
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/merge-patch+json",
+            "Authorization": `Bearer ${Cookies.get("auth")}`,
+          },
+          body: JSON.stringify(request_data)
         })
-    }
+      }
 
     function create_group() {
         let url = `${env.API_URL}/groups`
@@ -130,12 +132,14 @@ function CreateGroup() {
                                     </div>
                                     {session.user.data?.groups.includes(`/api/groups/${item.id}`) ? (
                                         <img
+                                            key={"img" + index}
                                             src="/assets/check.png"
                                             alt="Joined"
                                             className="bg-transparent px-2 py-1 rounded-md shadow-custom w-1/6"
                                         />
                                     ) : (
                                         <button
+                                        key={"button" + index}
                                             className="bg-transparent p-2 rounded-md shadow-custom hover:scale-105 w-1/6"
                                             onClick={() => joinGroup(item.id)}
                                         >

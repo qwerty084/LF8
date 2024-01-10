@@ -66,7 +66,7 @@ export default function RootLayout({
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src={session.user.data?.avatar} className="w-16 cursor-pointer" onClick={() => window.location.href = "/settings"} />
+              <img src={"https://localhost" + session.user.data?.avatar} className="rounded-full w-16 cursor-pointer" onClick={() => window.location.href = "/settings"} />
               <div className="flex flex-col"><p className="cursor-pointer" onClick={() => window.location.href = "/settings"}>{session.user.data?.username}</p>
                 <p className={`text-xs ${textaccent}`}>{session.user.data?.id}</p></div>
             </div>

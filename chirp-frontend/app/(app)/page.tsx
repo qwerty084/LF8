@@ -7,6 +7,7 @@ import { getTheme } from "../layout";
 import { CreateChat } from "@/components/chat.component";
 import { io } from "socket.io-client";
 import { env } from "@/env";
+import Cookies from "js-cookie";
 
 const { bgColor, itemColor, textColor, textaccent } = getTheme();
 
@@ -20,9 +21,12 @@ interface GroupType {
   id: number;
   name: string;
   avatar: string;
+  members: Members[];
+  description: string;
 }
 
 interface ContactType {
+  chatId: number;
   id: number;
   name: string;
   avatar: string;
@@ -36,25 +40,21 @@ interface userDetails {
   bio: string;
 }
 
-interface groupDetails {
-  id: number;
-  name: string;
-  avatar: string;
-  members: Members[];
-  description: string;
-}
-
 interface chatType {
   senderId: number;
   message: string;
+  createdAt: string;
 }
 
 interface messageStorage {
-  roomId: string;
-  messages: {
-    userId: number
-    message: string
-  }
+  Id: number;
+  messages: message[]
+}
+
+interface message {
+  senderId: number;
+  message: string;
+  createdAt: string;
 }
 
 export default function Home() {
@@ -63,23 +63,23 @@ export default function Home() {
   const [contacts, setContacts] = useState<ContactType[]>([]);
 
   const [chat, setChat] = useState<chatType[] | null>();
+  const [messageStorage, setMessageStorage] = useState<messageStorage[]>([])
+
   const [message, setMessage] = useState<string>("")
   const [isGroup, setIsGroup] = useState<boolean | null>(null);
   const [userDetails, setUserDetails] = useState<userDetails>();
-  const [groupDetails, setGroupDetails] = useState<groupDetails>();
+  const [groupDetails, setGroupDetails] = useState<GroupType>();
 
   const [createChat, setCreateChat] = useState<string | null>(null)
 
   const [selectedChat, setSelectedChat] = useState<number | null>(null)
 
-  const defaultUser = {
+  const defaultUser: userDetails = {
     id: 0,
     name: "",
     avatar: "",
     status: "",
     bio: "",
-    messagescore: 0,
-    createdAt: "",
   }
 
   const defaultGroup = {
@@ -88,14 +88,47 @@ export default function Home() {
     avatar: "",
     members: [],
     description: "",
-    messages: 0,
-    createdAt: "",
   }
 
-  function get_groups_and_chats() {
-    setGroups(testgroups);
-    setContacts(testcontacts);
+  async function get_groups_and_chats() {
+    let url = `${env.API_URL}/groups/${session.user.data?.id}/users`
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${Cookies.get("auth")}`,
+      },
+    });
+    const data = await response.json();
+
+    let groups: GroupType[] = [];
+    let contacts: ContactType[] = [];
+
+    data.forEach((item: any) => {
+      if (item.members.length <= 2) {
+
+        const contact_user = item.members.find((member: any) => member.id !== session.user.data?.id)
+
+        const constact_data: ContactType = {
+          chatId: item.id,
+          id: contact_user.id,
+          name: contact_user.username,
+          avatar: contact_user.avatar,
+        }
+        contacts.push(constact_data);
+      } else {
+
+
+        groups.push(item);
+      }
+    });
+
+    setGroups(groups);
+    setContacts(contacts);
+    console.log(groups)
   }
+
 
   function joinRoom(roomId: string) {
     const socket = io(env.WS_URL)
@@ -108,7 +141,37 @@ export default function Home() {
     })
   }
 
-  function select_group(id: any) {
+  async function loadChat(id: number) {
+    const existingConversation = messageStorage.find(conversation => conversation.Id === id)
+    if (existingConversation) {
+      console.log("load messages from messageStorage")
+      setChat(existingConversation.messages)
+    } else {
+      console.log("load messges from backend")
+      //get all messages of the chat from backend ==> setChat(messages)
+      let url = `${env.API_URL}/message/${id}/groups`
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("auth")}`,
+        },
+      })
+
+      const data = await response.json();
+
+      const messageStorageItem = {
+        Id: id,
+        messages: data
+      }
+
+      setMessageStorage([...messageStorage, messageStorageItem])
+      setChat(messageStorageItem.messages)
+    }
+  }
+
+  function select_group(id: number) {
     if (id === groupDetails?.id) {
       setIsGroup(null)
       setChat(null)
@@ -117,29 +180,24 @@ export default function Home() {
       setGroupDetails(defaultGroup)
     } else {
       setCreateChat(null)
-      //fetch groupchat data
-      let url = `${env.API_URL}/groups`
-
-
-      setGroupDetails({
-        id: id,
-        name: "Group one",
-        avatar: "assets/pfp5.JPG",
-        members: [
-          { id: 1, name: "Luca Helms", avatar: "assets/pfp.JPG" },
-          { id: 2, name: "Filip", avatar: "assets/pfp5.JPG" },
-          { id: 3, name: "Hendrik", avatar: "assets/pfp6.JPG" },
-          { id: 4, name: "Jasmin", avatar: "assets/pfp4.webp" },
-        ],
-        description: "First Test Group",
-      });
+      //get data from groups.find(by)
+      const group = groups.find(group => group.id === id);
+      if (group) {
+        setGroupDetails({
+          id: group.id,
+          name: group.name,
+          avatar: group.avatar,
+          members: group.members,
+          description: group.description,
+        });
+      }
       setIsGroup(true);
       setSelectedChat(id)
-      setChat(testchat);
+      loadChat(id)
     }
   }
 
-  function select_chat(id: any) {
+  async function select_chat(id: number, senderId: any) {
     if (id === userDetails?.id) {
       setIsGroup(null)
       setChat(null)
@@ -148,34 +206,53 @@ export default function Home() {
       setUserDetails(defaultUser)
     } else {
       setCreateChat(null)
-      //fetch user data
-      setUserDetails({
-        id: 1,
-        name: "Filip",
-        avatar: "assets/pfp5.JPG",
-        status: "hey i use Chirp",
-        bio: "JUNGE bin ich dumm...",
+
+      // Fetch user data from backend
+      let url = `${env.API_URL}/users/${senderId}`
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Cookies.get("auth")}`,
+        },
       });
+      const data = await response.json();
+
+      // Set user details
+      setUserDetails({
+        id: senderId,
+        name: data.username,
+        avatar: data.image.filePath, // Use the filePath from the image object for the avatar
+        status: data.status,
+        bio: data.bio,
+      });
+
       setCreateChat(null)
       setIsGroup(false);
       setSelectedChat(id)
-      setChat(testchat);
+      loadChat(id)
     }
   }
 
+
   function handleCreateChat(type: string | null) {
     setCreateChat(type)
+    setIsGroup(null)
+    setChat(null)
+    setSelectedChat(null)
   }
 
   {/* Use senderId only for local messages. the backend should get the sender id of an verifyed JWT to secure the right id */ }
   function send_message(senderId: number, message: string) {
-    if(message === "") {
+    if (message === "") {
       return
     }
     // Create a new message object
     const newMessage = {
       senderId: senderId,
-      message: message
+      message: message,
+      createdAt: new Date().toISOString()
+
     };
 
     // Add the new message to the chat
@@ -213,7 +290,7 @@ export default function Home() {
             className="w-full flex justify-center cursor-pointer py-1 mt-4"
           >
             <img
-              src={group.avatar}
+              src={"https://localhost" + group.avatar}
               alt={group.name}
               className={`flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl ${selectedChat === group.id ? "rounded-num-2xl" : ""}`}
             />
@@ -241,13 +318,13 @@ export default function Home() {
         {contacts.map((contact: any) => (
           <div
             key={contact.id}
-            onClick={() => select_chat(contact.id)}
+            onClick={() => select_chat(contact.chatId, contact.id)}
             className={`flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none ${selectedChat === contact.id ? "rounded-r-none shadow-md" : ""}`}
           >
             <img
               alt="avatar"
-              src={contact.avatar}
-              className="flex items-center w-14 rounded-full"
+              src={"https://localhost" + contact.avatar}
+              className="flex items-center w-10 h-10 rounded-full"
             />
             <p className="flex items-center text-xl">{contact.name}</p>
           </div>
@@ -259,9 +336,9 @@ export default function Home() {
           <div id="chatMessages" className="h-[80vh] overflow-y-auto scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-100">
             {!chat ? emptyChat() : chat?.map((item, index) => (
               item.senderId === session.user.data?.id ?
-                <div key={index} className="flex justify-end items-center mt-2"><p className="flex pl-2 py-1 items-center rounded-full  shadow-custom">{item.message}<img src={session.user.data.avatar} alt="avatar" className="rounded-full ml-2 w-10" /></p></div>
+                <div key={index} className="flex justify-end items-center mt-2"><p className="flex pl-2 py-1 items-center rounded-full  shadow-custom">{item.message}<img src={"https://localhost" + session.user.data.avatar} alt="avatar" className="rounded-full ml-2 w-10 h-10" /></p></div>
                 :
-                <div key={index} className="flex justify-start items-center mt-2"><p className="flex pr-2 py-1 items-center rounded-full  shadow-custom"><img alt="avatar" src={isGroup ? groupDetails?.members.find(member => member.id === item.senderId)?.avatar : userDetails?.avatar} className="rounded-full mr-2 w-10" />{item.message}</p></div>
+                <div key={index} className="flex justify-start items-center mt-2"><p className="flex pr-2 py-1 items-center rounded-full  shadow-custom"><img alt="avatar" src={"https://localhost" + (isGroup ? groupDetails?.members.find(member => member.id === item.senderId)?.avatar : userDetails?.avatar)} className="rounded-full mr-2 w-10 h-10" />{item.message}</p></div>
             ))}
             <div ref={messagesEndRef} />
           </div>
@@ -286,7 +363,7 @@ export default function Home() {
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img alt="avatar" src={userDetails?.avatar} className="w-16 rounded-full" />
+              <img alt="avatar" src={"https://localhost" + userDetails?.avatar} className="w-16 h-16 rounded-full" />
               <div className="flex flex-col">
                 <p>{userDetails?.name}</p>
                 <p className={`text-xs ${textaccent}`}>{userDetails?.id}</p>
@@ -328,16 +405,15 @@ export default function Home() {
                 id="groupMembers"
                 className="flex flex-row items-center gap-2 mb-2 text-md font-semibold"
               >
-                <img alt="avatar" src={member.avatar} className="w-10 rounded-full" />
+                <img alt="avatar" src={"https://localhost" + member.avatar} className="w-10 h-10 rounded-full" />
                 <div className="flex flex-col">
-                  <p>{member.name}</p>
+                  <p>{member.username}</p>
                   <p className={`text-xs ${textaccent}`}>{member.id}</p>
 
                 </div>
               </div>
             ))}
           </div>
-
           <div id="description" className="flex flex-col mb-4 min-h-[10%]">
             <span className="font-semibold">Group Description: </span>
             <span className="rounded-md h-full">

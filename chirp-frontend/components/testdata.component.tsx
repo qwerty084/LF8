@@ -1,8 +1,8 @@
 export const testcontacts = [
-    { id: 1, name: "Luca Helms", avatar: "assets/pfp.JPG" },
-    { id: 2, name: "Filip", avatar: "assets/pfp5.JPG" },
-    { id: 3, name: "Hendrik", avatar: "assets/pfp6.JPG" },
-    { id: 4, name: "Jasmin", avatar: "assets/pfp4.webp" },
+    { chatId: 6, id: 1, name: "Luca Helms", avatar: "assets/pfp.JPG" },
+    { chatId: 7, id: 2, name: "Filip", avatar: "assets/pfp5.JPG" },
+    { chatId: 8, id: 3, name: "Hendrik", avatar: "assets/pfp6.JPG" },
+    { chatId: 9, id: 4, name: "Jasmin", avatar: "assets/pfp4.webp" },
 ]
 
 export const testgroups = [
@@ -17,55 +17,68 @@ export const testgroups = [
 export const testchat = [
     {
         senderId: 1,
-        message: "Hey"
+        message: "Hey",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 2,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 3,
-        message: "Nischt"
+        message: "Nischt",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 4,
-        message: "Garnichts"
+        message: "Garnichts",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 1,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 1,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 2,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 1,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 1,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 1,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 2,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 2,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
     {
         senderId: 1,
-        message: "Naa was geht"
+        message: "Naa was geht",
+        createdAt: new Date().toISOString()
     },
 ]
 
