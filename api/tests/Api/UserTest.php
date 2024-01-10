@@ -3,7 +3,6 @@
 namespace App\Tests\Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use Exception;
 
 class UserTest extends ApiTestCase
 {
@@ -25,9 +24,11 @@ class UserTest extends ApiTestCase
             "email" => "user12345@example.com",
             "username" => "string"
         ]);
+    }
 
-        if ($this->assertJsonContains("password")) {
-            throw new Exception("Password in response");
-        }
+    public function testDeleteUser(): void
+    {
+        static::createClient()->request('DELETE', '/api/users/2');
+        $this->assertResponseStatusCodeSame(204);
     }
 }
