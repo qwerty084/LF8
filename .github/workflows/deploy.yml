@@ -11,7 +11,7 @@ on:
 env:
   PROJECT_ID: avian-sunlight-410710
   REGION: europe-west10
-  GAR_LOCATION: europe-west10-docker.pkg.dev/avian-sunlight-410710/repo-1/
+  GAR_LOCATION: europe-west10-docker.pkg.dev/avian-sunlight-410710/chirp-repo
 
 jobs:
   build-push-artifact:
