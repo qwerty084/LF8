@@ -44,4 +44,4 @@ jobs:
         # working-directory: qwerty084/lf8
 
       - name: Push image
-        run: docker push ${{ env.GAR_LOCATION }}
+        run: docker push ${{ env.GAR_LOCATION }}chirp-image:latest
