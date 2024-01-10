@@ -37,7 +37,7 @@ jobs:
 
       - name: Build image
         run: docker build . --file ./api/Dockerfile --tag ${{ env.GAR_LOCATION }}
-        working-directory: qwerty084/lf8
+        # working-directory: qwerty084/lf8
 
       - name: Push image
         run: docker push ${{ env.GAR_LOCATION }}
