@@ -10,6 +10,10 @@ jobs:
     name: Build and Push to GCP
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./api
+
     env:
       IMAGE_NAME: chirp-frontend
       PROJECT_ID: avian-sunlight-410710
