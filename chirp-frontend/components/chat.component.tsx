@@ -4,13 +4,13 @@ import { SetStateAction, useEffect, useState } from "react";
 import { session } from "./auth.component";
 
 type Group = {
-  id: number;
-  name: string;
-  avatar: string;
+    id: number;
+    name: string;
+    avatar: string;
 };
 
 export function CreateChat({ chatType }: { chatType: string | null }) {
-  return chatType === "group" ? <CreateGroup /> : <CreateContact />;
+    return chatType === "group" ? <CreateGroup /> : <CreateContact />;
 }
 
 /**
@@ -22,138 +22,138 @@ export function CreateChat({ chatType }: { chatType: string | null }) {
  * the new group data to the server.
  */
 function CreateGroup() {
-  const [groupName, setGroupName] = useState<string>();
-  const [groupDescription, setGroupDescription] = useState<string>();
-  const [avatar, setAvatar] = useState<any>();
+    const [groupName, setGroupName] = useState<string>();
+    const [groupDescription, setGroupDescription] = useState<string>();
+    const [avatar, setAvatar] = useState<any>();
 
-  const [searchInput, setSearchInput] = useState<string>();
-  const [availableGroups, setAvaiableGroups] = useState<Group[]>([
-    { id: 0, name: "No Groups avaiable", avatar: "" },
-  ]);
-  const [searchResults, setSearchResults] = useState<Group[]>([]);
+    const [searchInput, setSearchInput] = useState<string>();
+    const [availableGroups, setAvaiableGroups] = useState<Group[]>([
+        { id: 0, name: "No Groups avaiable", avatar: "" },
+    ]);
+    const [searchResults, setSearchResults] = useState<Group[]>([]);
 
-  const handleChange = (event: {
-    target: { value: SetStateAction<string | undefined> };
-  }) => {
-    setSearchInput(event.target.value);
-  };
-
-  /**
-   * useEffect hook that filters the available groups based on the search input.
-   * It sets the searchResults state to the filtered groups whenever the searchInput changes.
-   */
-  useEffect(() => {
-    if (searchInput) {
-      const results = availableGroups.filter((group) =>
-        group.name.toLowerCase().includes(searchInput.toLowerCase()),
-      );
-      setSearchResults(results);
-    }
-  }, [searchInput]);
-
-  async function get_groups() {
-    let url = `${env.API_URL}/groups`;
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Cookies.get("auth")}`,
-      },
-    });
-    const data = await response.json();
-    console.log(data);
-    if (response.status === 200) {
-      console.log(data);
-      const groups = data.map((group: { id: any; name: any; avatar: any }) => ({
-        id: group.id,
-        name: group.name,
-        avatar: group.avatar,
-      }));
-      console.log(groups);
-      setAvaiableGroups(groups);
-    }
-  }
-
-  async function uploadAvatar() {
-    if (!avatar) {
-      return 1;
-    }
-
-    let url = `${env.API_URL}/media_objects`;
-    let formData = new FormData();
-    formData.append("file", avatar);
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${Cookies.get("auth")}`,
-      },
-      body: formData,
-    });
-
-    if (response.ok) {
-      let jsonResponse = await response.json();
-      return `/api/media_objects/${jsonResponse.id}`;
-    } else {
-      console.error("Upload failed");
-      return null;
-    }
-  }
-
-  function joinGroup(groupId: number) {
-    let url = `${env.API_URL}/users/${session.user.data?.id}`;
-
-    // Map each group id to "/api/groups/id"
-    let groups = session.user.data?.groups?.map((id) => `/api/groups/${id}`);
-
-    groups?.push(`/api/groups/${groupId}`);
-
-    console.log(groups);
-
-    const request_data = {
-      groups: groups,
+    const handleChange = (event: {
+        target: { value: SetStateAction<string | undefined> };
+    }) => {
+        setSearchInput(event.target.value);
     };
 
-    console.log(request_data);
-    const response = fetch(url, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/merge-patch+json",
-        Authorization: `Bearer ${Cookies.get("auth")}`,
-      },
-      body: JSON.stringify(request_data),
-    });
-  }
+    /**
+     * useEffect hook that filters the available groups based on the search input.
+     * It sets the searchResults state to the filtered groups whenever the searchInput changes.
+     */
+    useEffect(() => {
+        if (searchInput) {
+            const results = availableGroups.filter((group) =>
+                group.name.toLowerCase().includes(searchInput.toLowerCase()),
+            );
+            setSearchResults(results);
+        }
+    }, [searchInput, availableGroups]);
 
-  async function create_group() {
-    let url = `${env.API_URL}/groups`;
-    let avatarId = await uploadAvatar();
+    async function get_groups() {
+        let url = `${env.API_URL}/groups`;
 
-    const request_data = {
-      name: groupName,
-      avatar: `${env.API_URL}/api/media_objects/${avatarId}`,
-      description: groupDescription,
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Cookies.get("auth")}`,
+            },
+        });
+        const data = await response.json();
+        console.log(data);
+        if (response.status === 200) {
+            console.log(data);
+            const groups = data.map((group: { id: any; name: any; avatar: any }) => ({
+                id: group.id,
+                name: group.name,
+                avatar: group.avatar,
+            }));
+            console.log(groups);
+            setAvaiableGroups(groups);
+        }
+    }
+
+    async function uploadAvatar() {
+        if (!avatar) {
+            return 1;
+        }
+
+        let url = `${env.API_URL}/media_objects`;
+        let formData = new FormData();
+        formData.append("file", avatar);
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${Cookies.get("auth")}`,
+            },
+            body: formData,
+        });
+
+        if (response.ok) {
+            let jsonResponse = await response.json();
+            return `/api/media_objects/${jsonResponse.id}`;
+        } else {
+            console.error("Upload failed");
+            return null;
+        }
+    }
+
+    function joinGroup(groupId: number) {
+        let url = `${env.API_URL}/users/${session.user.data?.id}`;
+
+        // Map each group id to "/api/groups/id"
+        let groups = session.user.data?.groups?.map((id) => `/api/groups/${id}`);
+
+        groups?.push(`/api/groups/${groupId}`);
+
+        console.log(groups);
+
+        const request_data = {
+            groups: groups,
+        };
+
+        console.log(request_data);
+        const response = fetch(url, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/merge-patch+json",
+                Authorization: `Bearer ${Cookies.get("auth")}`,
+            },
+            body: JSON.stringify(request_data),
+        });
+    }
+
+    async function create_group() {
+        let url = `${env.API_URL}/groups`;
+        let avatarId = await uploadAvatar();
+
+        const request_data = {
+            name: groupName,
+            avatar: `${env.API_URL}/api/media_objects/${avatarId}`,
+            description: groupDescription,
+        };
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Cookies.get("auth")}`,
+            },
+            body: JSON.stringify(request_data),
+        });
+    }
+
+    const handleUpload = async (event: any) => {
+        const file = event.target.files[0];
+        setAvatar(file);
     };
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Cookies.get("auth")}`,
-      },
-      body: JSON.stringify(request_data),
-    });
-  }
-
-  const handleUpload = async (event: any) => {
-    const file = event.target.files[0];
-    setAvatar(file);
-  };
-
-  useEffect(() => {
-    get_groups();
-  }, []);
+    useEffect(() => {
+        get_groups();
+    }, []);
 
     return (
         <div className="w-full h-full">
@@ -172,7 +172,7 @@ function CreateGroup() {
                     <div className="flex flex-col justify-center">
                         {(searchInput ? searchResults : availableGroups).map(
                             (item, index) => (
-                                <div>
+                                <div key={index}>
                                     <div
                                         key={index}
                                         className="flex justify-between m-2 items-center"
@@ -239,14 +239,14 @@ function CreateGroup() {
                         />
                     </div>
                     <div className="mx-4">
-                    <button
-                        className="bg-transparent p-2 w-2/5 mr-2 rounded-md shadow-custom hover:scale-105"
-                        onClick={create_group}
-                    >
-                        Create Group
-                    </button>
+                        <button
+                            className="bg-transparent p-2 w-2/5 mr-2 rounded-md shadow-custom hover:scale-105"
+                            onClick={create_group}
+                        >
+                            Create Group
+                        </button>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -255,12 +255,12 @@ function CreateGroup() {
 }
 
 function CreateContact() {
-  const [userId, setUserId] = useState<number>();
-  const [personalDescription, setPersonalDescription] = useState<string>();
+    const [userId, setUserId] = useState<number>();
+    const [personalDescription, setPersonalDescription] = useState<string>();
 
-  return (
-    <div className="w-full h-full">
-      <div className="flex justify-center">Add a Friend to your list</div>
-    </div>
-  );
+    return (
+        <div className="w-full h-full">
+            <div className="flex justify-center">Add a Friend to your list</div>
+        </div>
+    );
 }
