@@ -56,6 +56,10 @@ class Group
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
     private ?string $description = null;
+    
+    #[ORM\Column]
+    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    private ?bool $isGroupChat = null;
 
     public function __construct()
     {
@@ -133,6 +137,18 @@ class Group
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function isIsGroupChat(): ?bool
+    {
+        return $this->isGroupChat;
+    }
+
+    public function setIsGroupChat(bool $isGroupChat): static
+    {
+        $this->isGroupChat = $isGroupChat;
 
         return $this;
     }
