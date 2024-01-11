@@ -5,6 +5,7 @@ namespace App\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserPasswordHasher implements ProcessorInterface
@@ -13,6 +14,13 @@ final class UserPasswordHasher implements ProcessorInterface
     {
     }
 
+    /**
+     * @param mixed $data
+     * @param Operation $operation
+     * @param array<string, mixed> $uriVariables
+     * @param array<string, mixed>&array{request: unset|Request, previous_data: unset|mixed, resource_class: unset|string, original_data: unset|mixed} $context
+     * @return T
+     */
     public function process($data, Operation $operation, array $uriVariables = [], array $context = [])
     {
         if (!$data->getPlainPassword()) {

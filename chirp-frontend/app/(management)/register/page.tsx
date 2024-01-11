@@ -20,8 +20,8 @@ export default function Registration() {
       password: password,
     };
     if (password !== verifyPassword) {
-      setPasswordError(true)
-      console.log("passwords must match")
+      setPasswordError(true);
+      console.log("passwords must match");
     } else {
       const response = await fetch(url, {
         method: "POST",
@@ -32,15 +32,15 @@ export default function Registration() {
       });
 
       const data = await response.json();
-     switch(response.status) {
-      case 201:
-        console.log("authorized");
-        window.location.href = "/login";
-      case 400:
-        console.log("invalid Input")
-      case 422:
-        console.log("email Adress already exists")
-     }
+      switch (response.status) {
+        case 201:
+          console.log("authorized");
+          window.location.href = "/login";
+        case 400:
+          console.log("invalid Input");
+        case 422:
+          console.log("email Adress already exists");
+      }
     }
   }
 
@@ -89,8 +89,9 @@ export default function Registration() {
               Password
             </label>
             <input
-              className={`w-2/5 bg-transparent shadow-custom rounded-md p-2 mb-4 focus:outline-none ${passwordError ? "border-2 border-red-500" : ""
-                }`}
+              className={`w-2/5 bg-transparent shadow-custom rounded-md p-2 mb-4 focus:outline-none ${
+                passwordError ? "border-2 border-red-500" : ""
+              }`}
               type="password"
               name="password"
               id="password"
@@ -102,8 +103,9 @@ export default function Registration() {
               Verify Password
             </label>
             <input
-              className={`w-2/5 bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${passwordError ? "border-2 border-red-500" : ""
-                }`}
+              className={`w-2/5 bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${
+                passwordError ? "border-2 border-red-500" : ""
+              }`}
               type="password"
               name="verify_password"
               id="verify_password"

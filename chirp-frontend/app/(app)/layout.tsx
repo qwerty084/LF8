@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { getTheme } from "../layout";
-import { session } from "@/components/auth.component"
+import { session } from "@/components/auth.component";
 import { LoadingScreen } from "@/components/loading.component";
 
 const { bgColor, itemColor, textColor, textaccent } = getTheme();
@@ -17,25 +17,24 @@ export default function RootLayout({
     window.location.href = "/meet&greet";
   }
   function chats() {
-    window.location.href = "/"
+    window.location.href = "/";
   }
 
-  //if (loading) {
-  //  return (
-  //    <div>
-  //      <LoadingScreen />
-  //    </div>
-  //  )
-  //}
-
   if (!session.auth.isAuthenticated(session.user, session.config)) {
-    window.location.href = "/login"
+    window.location.href = "/login";
   } else {
     return (
-      <div className={`flex flex-col h-screen w-screen ${bgColor} ${textColor}`}>
+      <div
+        className={`flex flex-col h-screen w-screen ${bgColor} ${textColor}`}
+      >
         <div id="header" className="flex flex-row w-full">
           <div className="w-24 h-24 shadow-custom">
-            <img alt="chirp" src="assets/chirp_logo.png" className="cursor-pointer" onClick={() => chats()} />
+            <img
+              alt="chirp"
+              src="assets/chirp_logo.png"
+              className="cursor-pointer"
+              onClick={() => chats()}
+            />
           </div>
           <div className="flex justify-center items-center w-1/6 h-24 ">
             <input
@@ -66,9 +65,22 @@ export default function RootLayout({
               id="session_user"
               className="flex flex-row items-center gap-2 text-xl font-bold"
             >
-              <img src={"https://localhost" + session.user.data?.avatar} className="rounded-full w-16 cursor-pointer" onClick={() => window.location.href = "/settings"} />
-              <div className="flex flex-col"><p className="cursor-pointer" onClick={() => window.location.href = "/settings"}>{session.user.data?.username}</p>
-                <p className={`text-xs ${textaccent}`}>{session.user.data?.id}</p></div>
+              <img
+                src={"https://localhost" + session.user.data?.avatar}
+                className="rounded-full h-16 w-16 cursor-pointer"
+                onClick={() => (window.location.href = "/settings")}
+              />
+              <div className="flex flex-col">
+                <p
+                  className="cursor-pointer"
+                  onClick={() => (window.location.href = "/settings")}
+                >
+                  {session.user.data?.username}
+                </p>
+                <p className={`text-xs ${textaccent}`}>
+                  {session.user.data?.id}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -76,5 +88,4 @@ export default function RootLayout({
       </div>
     );
   }
-
 }
