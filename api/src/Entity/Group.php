@@ -50,7 +50,7 @@ class Group
     #[ORM\OneToOne(targetEntity: MediaObject::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
-    #[Groups(['group', 'group:create', 'group:write', 'group:update', 'group:read'])]
+    #[Groups(['group', 'group:create', 'group:write', 'group:update'])]
     private ?MediaObject $avatar = null;
 
     #[ORM\Column(length: 255, nullable: true)]
