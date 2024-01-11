@@ -35,7 +35,7 @@ final class UserFactory extends ModelFactory
      *
      * @todo inject services if required
      */
-    public function __construct(private UserPasswordHasherInterface $passwordHasher)
+    public function __construct()
     {
         parent::__construct();
     }
@@ -47,13 +47,10 @@ final class UserFactory extends ModelFactory
      */
     protected function getDefaults(): array
     {
-        $user = new User();
-        $user->setPassword($this->passwordHasher->hashPassword($user, self::faker()->password()));
-
         return [
             'createdAt' => self::faker()->dateTime(),
             'email' => self::faker()->email(),
-            'password' => $user->getPassword(),
+            'password' => self::faker()->password(),
             'roles' => [],
             'username' => self::faker()->userName(),
         ];

@@ -6,18 +6,23 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 
 class UserTest extends ApiTestCase
 {
+    public $userId;
+
     public function testCreateUser(): void
     {
-        static::createClient()->request('POST', '/api/users', [
+        $response = static::createClient()->request('POST', '/api/users', [
             'json' => [
                 "email" => "user12345@example.com",
                 "username" => "string",
                 "password" => "string"
             ],
             'headers' => [
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
             ],
         ]);
+
+        $this->userId = $response->toArray()["id"];
 
         $this->assertResponseStatusCodeSame(201);
         $this->assertJsonContains([
@@ -25,10 +30,24 @@ class UserTest extends ApiTestCase
             "username" => "string"
         ]);
     }
-
+    
     public function testDeleteUser(): void
     {
-        static::createClient()->request('DELETE', '/api/users/2');
+        $response = static::createClient()->request('POST', '/api/users', [
+            'json' => [
+                "email" => "user12345@example.com",
+                "username" => "string",
+                "password" => "string"
+            ],
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ],
+        ]);
+
+        $this->userId = $response->toArray()["id"];
+
+        static::createClient()->request('DELETE', "/api/users/" . $this->userId);
         $this->assertResponseStatusCodeSame(204);
     }
 }
