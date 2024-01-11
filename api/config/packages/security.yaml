@@ -37,6 +37,14 @@ security:
 
 when@test:
     security:
+        firewalls:
+            dev:
+                pattern: ^/(_(profiler|wdt)|css|images|js)/
+                security: false
+            main:
+                pattern: ^/
+                security: false
+                # other options like form_login, http_basic etc. can be disabled here
         password_hashers:
             # By default, password hashers are resource intensive and take time. This is
             # important to generate secure password hashes. In tests however, secure hashes

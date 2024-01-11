@@ -40,7 +40,7 @@ use ApiPlatform\Metadata\ApiProperty;
 #[UniqueEntity('email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['user:read', 'group'])]
+    #[Groups(['user', 'user:read', 'user:create', 'user:update', 'group'])]
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
