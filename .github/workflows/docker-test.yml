@@ -32,6 +32,21 @@ jobs:
     - name: Check API reachability
       run: curl -vk -o /dev/null https://localhost
 
+    - name: Drop database
+      run: docker compose exec -T php php bin/console -e test doctrine:database:drop --force
+
+    - name: Create test database
+      run: docker compose exec -T php php bin/console -e test doctrine:database:create
+
+    - name: Run migrations
+      run: docker compose exec -T php php bin/console -e test doctrine:migrations:migrate --no-interaction
+
+    - name: Load doctrine fixtures
+      run: docker compose exec php php bin/console doctrine:fixtures:load --purge-with-truncate --no-interaction
+
+    - name: Execute phpunit Tests
+      run: docker compose exec php php bin/phpunit
+
     # @todo add database, migration and unit tests.
     # https://github.com/api-platform/api-platform/blob/main/.github/workflows/ci.yml
 
