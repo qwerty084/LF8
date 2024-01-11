@@ -1,8 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { itemColor } from "../../layout";
-import { env } from "../../../env"
-import { session } from "../../../components/auth.component"
+import { env } from "../../../env";
+import { session } from "../../../components/auth.component";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -11,12 +10,12 @@ export default function Login() {
 
   async function handleSubmit(e: any) {
     e.preventDefault();
-    let url = `${env.API_URL}/auth`
+    let url = `${env.API_URL}/auth`;
 
     const user = {
-      "email": email,
-      "password": password
-    }
+      email: email,
+      password: password,
+    };
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -28,9 +27,9 @@ export default function Login() {
     const data = await response.json();
     if (data.code === 401) {
       console.log("Unauthorized");
-      setLoginError(true)
+      setLoginError(true);
     } else {
-      console.log("authorized")
+      console.log("authorized");
       session.auth.createAuthCookie(data.token);
       window.location.href = "/";
     }
@@ -49,7 +48,9 @@ export default function Login() {
               Email
             </label>
             <input
-              className={`w-full bg-transparent shadow-custom rounded-md p-2 focus:outline-none ${loginError ? "border-2 border-red-500" : ""}`}
+              className={`w-full bg-transparent shadow-custom rounded-md p-2 focus:outline-none ${
+                loginError ? "border-2 border-red-500" : ""
+              }`}
               type="email"
               name="email"
               id="email"
@@ -63,7 +64,9 @@ export default function Login() {
               Password
             </label>
             <input
-              className={`w-full bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${loginError ? "border-2 border-red-500" : ""}`}
+              className={`w-full bg-transparent shadow-custom rounded-md p-2 mb-12 focus:outline-none ${
+                loginError ? "border-2 border-red-500" : ""
+              }`}
               type="password"
               name="password"
               id="password"
@@ -83,7 +86,7 @@ export default function Login() {
               Forgot your Password?
             </a>
             <p>
-              <span>Don't have an Account? </span>
+              <span>{`Don't have an Account? `}</span>
               <a className="text-blue-500" href="/register">
                 Sign Up here.
               </a>
