@@ -36,16 +36,6 @@ docker-compose -f compose.prebuild.yaml up -d
 docker compose -f chirp-frontend/docker-compose.yml up -d
 ```
 
-## Routes
-
--   Next.js Frontend: http://localhost:3000
--   API: https://localhost/api
--   API Documentation: https://localhost/api/docs
-
-## Database (ERD)
-
-![Database](./assets/erd.webp)
-
 ## Building Docker images
 
 ```bash
@@ -63,3 +53,17 @@ docker build -t ghcr.io/qwerty084/api_dev:latest --target frankenphp_dev .
 ```bash
 docker build -t ghcr.io/qwerty084/api_prod:latest --target frankenphp_prod .
 ```
+
+## Routes
+
+-   Next.js Frontend: http://localhost:3000
+-   API: https://localhost/api
+-   API Documentation: https://localhost/api/docs
+
+## Database (ERD)
+
+![Database](./assets/erd.webp)
+
+## Deployment-Diagram
+
+![Deployment diagram](./assets/deployment-diagram.webp)
