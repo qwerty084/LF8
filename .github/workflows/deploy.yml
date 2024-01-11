@@ -1,53 +1,44 @@
-name: Google Cloud Deploy
-on:
-    release:
-      types: [published]
+name: Build and Push to Artifact Registry
 
-    workflow_dispatch:
+on:
+  pull_request:
+    branches: ["main"]
+
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: avian-sunlight-410710
+  REGION: europe-west10
+  GAR_LOCATION: europe-west10-docker.pkg.dev/avian-sunlight-410710/chirp-repo/
 
 jobs:
-    deploy:
-
-      runs-on: ubuntu-latest
+  build-push-artifact:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
         
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v3"
 
+      - id: "auth"
+        uses: "google-github-actions/auth@v1"
+        with:
+          credentials_json: "${{ secrets.SERVICE_ACCOUNT_KEY }}"
 
-        - name: Google auth
-          id: auth
-          uses: google-github-actions/auth@v1
-          with:
-            workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-            service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
 
-        - name: Set up Cloud SDK
-          uses: google-github-actions/setup-gcloud@v1
-          with:
-            project_id: ${{ env.PROJECT_ID }}
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
 
+      - name: "Docker auth"
+        run: |-
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-        - name: Docker auth
-          run: |-
-           gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
+      - name: Build image
+        run: docker build . --file Dockerfile --tag ${{ env.GAR_LOCATION }}chirp-image:latest
 
-        - name: Build and push container
-          run: |-
-            docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.APP }}/${{ env.APP }}:${{ github.sha }}" ./api
-            docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.APP }}/${{ env.APP }}:${{ github.sha }}"
-
-        - name: Create release name
-          run: |-
-            echo "RELEASE_NAME=${{ env.APP }}-${GITHUB_SHA::7}-${GITHUB_RUN_NUMBER}" >> ${GITHUB_ENV}
-
-
-        - name: Create Cloud Deploy release
-          uses: google-github-actions/create-cloud-deploy-release@v0
-          with:
-            delivery_pipeline: ${{ env.APP }}
-            name: ${{ env.RELEASE_NAME }}
-            region: ${{ env.REGION }}
-            description: ${{ env.GITHUB_COMMIT_MSG }}
-            skaffold_file: config/skaffold.yaml
-            images: app=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.APP }}/${{ env.APP }}:${{ github.sha }}
+      - name: Push image
+        run: docker push ${{ env.GAR_LOCATION }}chirp-image:latest
