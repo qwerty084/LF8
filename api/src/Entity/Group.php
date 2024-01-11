@@ -29,6 +29,7 @@ use ApiPlatform\Metadata\ApiProperty;
     normalizationContext: ['groups' => ['group']],
     denormalizationContext: ['groups' => ['group:create', 'group:update', 'group:write']]
 )]
+#[ApiResource(mercure: true)]
 class Group
 {
     #[ORM\Id]
