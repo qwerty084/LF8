@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-11T20:54:04.336Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" etag="Ye9zkFYuHjLVU0uM8GhH" version="22.1.18" type="google">
+  <diagram name="Page-1" id="weuPXp655EVJlRz6KAJf">
+    <mxGraphModel dx="2072" dy="1135" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-1" value="Docker Container 1&lt;br&gt;(Application Server)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=2;" parent="1" vertex="1">
+          <mxGeometry x="29" y="110" width="411" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-5" value="Rest API&lt;br&gt;&lt;br&gt;&lt;br&gt;localhost:443&lt;br&gt;&lt;br&gt;PHP" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;verticalAlign=top;" parent="1" vertex="1">
+          <mxGeometry x="130" y="200" width="220.5" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-6" value="Docker Container 2&lt;br&gt;(Web Server)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=2;" parent="1" vertex="1">
+          <mxGeometry x="780" y="110" width="411" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-7" value="Frontend&lt;br&gt;&lt;br&gt;&lt;br&gt;localhost:3000&lt;br&gt;&lt;br&gt;Next.js" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;verticalAlign=top;" parent="1" vertex="1">
+          <mxGeometry x="875.25" y="200" width="220.5" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-8" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=100;entryPerimeter=0;exitX=0.993;exitY=0.45;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="MALCcKYKvU_yQRVMnvaC-5" target="MALCcKYKvU_yQRVMnvaC-7" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="300" as="sourcePoint" />
+            <mxPoint x="800" y="300" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="590" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-9" value="JSON via HTTPS" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="570" y="260" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-10" value="Authentication via JWT" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="570" y="320" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-11" value="Docker Container 3&lt;br&gt;(Database Server)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=2;" parent="1" vertex="1">
+          <mxGeometry x="29" y="700" width="411" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-12" value="Docker Container 4&lt;br&gt;(Websocket Server)" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=2;" parent="1" vertex="1">
+          <mxGeometry x="780" y="700" width="411" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-13" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=0.544;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="MALCcKYKvU_yQRVMnvaC-14" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="250" y="630" as="sourcePoint" />
+            <mxPoint x="250" y="420" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="250" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-14" value="Postgres Database&lt;br&gt;&lt;br&gt;&lt;br&gt;localhost:5432&lt;br&gt;" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;verticalAlign=top;" parent="1" vertex="1">
+          <mxGeometry x="130" y="790" width="220.5" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-15" value="Node.js&lt;br&gt;&lt;br&gt;&lt;br&gt;localhost:3003&lt;br&gt;&lt;br&gt;Socket.io" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;verticalAlign=top;" parent="1" vertex="1">
+          <mxGeometry x="875.25" y="790" width="220.5" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-16" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=0.57;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="MALCcKYKvU_yQRVMnvaC-15" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1000" y="520" as="sourcePoint" />
+            <mxPoint x="1000" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-17" value="postgresql://${credentials}@database:5432" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry y="550" width="250" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MALCcKYKvU_yQRVMnvaC-18" value="Websocket/TCP" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="1030" y="550" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
