@@ -47,6 +47,3 @@ jobs:
     - name: Execute phpunit Tests
       run: docker compose exec php php bin/phpunit
 
-    # @todo add database, migration and unit tests.
-    # https://github.com/api-platform/api-platform/blob/main/.github/workflows/ci.yml
-
