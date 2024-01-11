@@ -1,10 +1,13 @@
 name: Frontend tests
-on: 
+on:
+  push:
+    branches:
+      - main
   pull_request:
     branches: main
   workflow_dispatch:
 
-jobs: 
+jobs:
   tests:
     strategy:
       matrix:
@@ -14,7 +17,7 @@ jobs:
     defaults:
       run:
         working-directory: ./chirp-frontend
-  
+
 
     steps:
       - uses: actions/checkout@v4
@@ -22,13 +25,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.version }}
-          
-      - name: Install npm
-        run: npm install -y
-        
+          cache: 'npm'
+          cache-dependency-path: ./chirp-frontend/package-lock.json
+
+      - name: Install npm dependencies
+        run: npm ci
+
       - name: Run npm lint
         run: npm run lint
-        
+
       - name: Build
         run: npm run build
 

@@ -18,4 +18,20 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag frankenphp-composer:$(date +%s)
+      run: docker compose build --no-cache
+
+    - name: Start docker services
+      run: docker compose up --wait
+
+    - name: Pause for 30secs
+      run: sleep 30
+
+    - name: Check HTTP reachability
+      run: curl -v -o /dev/null http://localhost
+
+    - name: Check API reachability
+      run: curl -vk -o /dev/null https://localhost
+
+    # @todo add database, migration and unit tests.
+    # https://github.com/api-platform/api-platform/blob/main/.github/workflows/ci.yml
+
