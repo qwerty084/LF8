@@ -84,17 +84,20 @@ export const session = {
       }
       return true;
     },
-    createAuthCookie: function (tokenObject: string) {
+    createAuthCookie: function (tokenObject: string, refreshToken: string) {
       if (ClientCookies.get("auth") !== undefined) {
         ClientCookies.remove("auth");
+        ClientCookies.remove("refresh_token");
       }
       var expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 7);
       ClientCookies.set("auth", tokenObject, { expires: expiryDate });
+      ClientCookies.set("refresh_token", refreshToken, { expires: expiryDate });
       console.log("auth token set");
     },
     removeAuthCookie: function () {
       ClientCookies.remove("auth");
+      ClientCookies.remove("refresh_token");
     },
   },
   user: {
@@ -115,8 +118,28 @@ export const session = {
     removeUser: function () {
       this.data = null;
     },
-    modifyUser: function () {},
+    refreshUser: async function (refreshToken: string) {
+      console.log("refreshing user");
+      let url = `${env.API_URL}/token/refresh`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `refresh_token=${refreshToken}`
+      });
+
+      if (response.ok) {
+        let jsonResponse = await response.json();
+        session.auth.createAuthCookie(jsonResponse.token, jsonResponse.refresh_token);
+        session.user.createUser()
+      } else {
+        console.error('Failed to refresh token');
+      }
+    },
   },
+
   config: {
     data: null as LocalConfigType | null,
 

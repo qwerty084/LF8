@@ -30,7 +30,7 @@ export default function Login() {
       setLoginError(true);
     } else {
       console.log("authorized");
-      session.auth.createAuthCookie(data.token);
+      session.auth.createAuthCookie(data.token, data.refresh_token);
       window.location.href = "/";
     }
   }

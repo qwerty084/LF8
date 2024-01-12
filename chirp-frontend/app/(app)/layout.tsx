@@ -1,10 +1,9 @@
 "use client";
 import React, { useState } from "react";
-import { getTheme } from "../layout";
+import { bgColor, itemColor, textColor, textaccent } from "@/components/components.layout";
 import { session } from "@/components/auth.component";
 import { LoadingScreen } from "@/components/loading.component";
-
-const { bgColor, itemColor, textColor, textaccent } = getTheme();
+import { redirect } from 'next/navigation'
 
 export default function RootLayout({
   children,
@@ -14,14 +13,17 @@ export default function RootLayout({
   const [searchInput, setSearchInput] = useState<string>();
 
   function meetandgreet() {
-    window.location.href = "/meet&greet";
+    redirect("/meet&greet")
   }
   function chats() {
-    window.location.href = "/";
+    redirect("/")
   }
 
   if (!session.auth.isAuthenticated(session.user, session.config)) {
-    window.location.href = "/login";
+if(window && window.location) {
+  window.location.href = "/login"
+}
+   
   } else {
     return (
       <div

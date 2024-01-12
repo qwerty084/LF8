@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { itemColor } from "../../layout";
+import { itemColor } from "@/components/components.layout";
 import { env } from "../../../env";
 
 export default function Registration() {

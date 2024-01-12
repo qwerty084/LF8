@@ -7,13 +7,11 @@ import {
   testgroups,
   testchat,
 } from "../../components/testdata.component";
-import { getTheme } from "../layout";
+import { textaccent } from "@/components/components.layout";
 import { CreateChat } from "@/components/chat.component";
 import { io } from "socket.io-client";
 import { env } from "@/env";
 import Cookies from "js-cookie";
-
-const { bgColor, itemColor, textColor, textaccent } = getTheme();
 
 type Members = {
   id: number;
@@ -80,6 +78,7 @@ export default function Home() {
   const [createChat, setCreateChat] = useState<string | null>(null);
 
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
+  const [didLoad, setDidLoad] = useState<boolean>(false);
 
   const defaultUser: userDetails = {
     id: 0,
@@ -113,7 +112,7 @@ export default function Home() {
     let contacts: ContactType[] = [];
 
     data.forEach((item: any) => {
-      if (item.members.length <= 2) {
+      if (item.isGroupChat !== true) {
         const contact_user = item.members.find(
           (member: any) => member.id !== session.user.data?.id,
         );
@@ -133,16 +132,47 @@ export default function Home() {
     setGroups(groups);
     setContacts(contacts);
     console.log(groups);
+
+    return { groups, contacts }
   }
 
   function joinRoom(roomId: string) {
     const socket = io(env.WS_URL);
-    //Join a Ws Room
+    // Join a WebSocket Room
     socket.emit("joinRoom", roomId);
 
-    //add an eventlistener for this room
-    socket.on(roomId, ({ roomId, userId, message }) => {});
+    // Add an event listener for this room
+    socket.on(roomId, ({ roomId, userId, message }) => {
+      console.log({ roomId, userId, message });
+      // Create a new message object
+      const newMessage = {
+        senderId: userId,
+        message: message,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Find the room in the message storage
+      const roomIndex = messageStorage.findIndex((room) => room.Id === roomId);
+
+      if (roomIndex !== -1) {
+        // If the room exists, add the new message to it
+        setMessageStorage((prevMessageStorage) => {
+          const updatedMessageStorage = [...prevMessageStorage];
+          updatedMessageStorage[roomIndex].messages.push(newMessage);
+          return updatedMessageStorage;
+        });
+      } else {
+        // If the room doesn't exist, create a new room with the new message
+        setMessageStorage((prevMessageStorage) => [
+          ...prevMessageStorage,
+          { Id: roomId, messages: [newMessage] },
+        ]);
+      }
+      setChat((prevChat) =>
+          prevChat ? [...prevChat, newMessage] : [newMessage]);
+    });
   }
+
 
   async function loadChat(id: number) {
     const existingConversation = messageStorage.find(
@@ -202,8 +232,8 @@ export default function Home() {
     }
   }
 
-  async function select_chat(id: number, senderId: any) {
-    if (id === userDetails?.id) {
+  async function select_chat(chatId: number, senderId: any) {
+    if (chatId === selectedChat) {
       setIsGroup(null);
       setChat(null);
       setSelectedChat(null);
@@ -234,8 +264,9 @@ export default function Home() {
 
       setCreateChat(null);
       setIsGroup(false);
-      setSelectedChat(id);
-      loadChat(id);
+      setSelectedChat(chatId);
+      loadChat(chatId);
+      console.log(chatId);
     }
   }
 
@@ -253,12 +284,17 @@ export default function Home() {
     if (message === "") {
       return;
     }
+    const socket = io(env.WS_URL);
+
     // Create a new message object
     const newMessage = {
-      senderId: senderId,
+      senderId: session.user.data?.id || 0,
       message: message,
       createdAt: new Date().toISOString(),
     };
+
+    // Emit the new message to the server
+    socket.emit("newMessage", { room: selectedChat, ...newMessage });
 
     // Add the new message to the chat
     setChat((prevChat) =>
@@ -270,7 +306,10 @@ export default function Home() {
   function handleKeyPress(event: React.KeyboardEvent) {
     if (event.key === "Enter") {
       event.preventDefault(); // Prevents the addition of a new line in the text field (optional)
-      userDetails && userDetails.id && send_message(userDetails.id, message);
+      if (session.user.data?.id && message) {
+        send_message(session.user.data.id, message);
+      }
+
     }
   }
 
@@ -280,11 +319,16 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, [chat]);
-
   useEffect(() => {
+    console.log("Hi")
     get_groups_and_chats();
-  }, []);
+
+      session.user.data?.groups.forEach((groupId) => {
+        joinRoom(groupId);
+        console.log(groupId);
+      });
+  }, [joinRoom]);
+
 
   return (
     <div id="body" className="flex flex-row flex-grow">
@@ -299,9 +343,8 @@ export default function Home() {
             <img
               src={"https://localhost" + group.avatar}
               alt={group.name}
-              className={`flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl ${
-                selectedChat === group.id ? "rounded-num-2xl" : ""
-              }`}
+              className={`flex items-center justify-center w-14 rounded-num-full transition-border-radius duration-100 ease-in-out transform hover:rounded-num-2xl ${selectedChat === group.id ? "rounded-num-2xl" : ""
+                }`}
             />
           </div>
         ))}
@@ -338,9 +381,8 @@ export default function Home() {
           <div
             key={contact.id}
             onClick={() => select_chat(contact.chatId, contact.id)}
-            className={`flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none ${
-              selectedChat === contact.id ? "rounded-r-none shadow-md" : ""
-            }`}
+            className={`flex flex-row px-2 py-1 gap-2 mt-4 ml-4 cursor-pointer rounded-md transition duration-300 hover:shadow-md hover:rounded-r-none ${selectedChat === contact.id ? "rounded-r-none shadow-md" : ""
+              }`}
           >
             <img
               alt="avatar"
@@ -362,50 +404,49 @@ export default function Home() {
               {!chat
                 ? emptyChat()
                 : chat?.map((item, index) =>
-                    item.senderId === session.user.data?.id ? (
-                      <div
-                        key={index}
-                        className="flex justify-end items-center mt-2"
-                      >
-                        <p className="flex pl-2 py-1 items-center rounded-full  shadow-custom">
-                          {item.message}
-                          <img
-                            src={"https://localhost" + session.user.data.avatar}
-                            alt="avatar"
-                            className="rounded-full ml-2 w-10 h-10"
-                          />
-                        </p>
-                      </div>
-                    ) : (
-                      <div
-                        key={index}
-                        className="flex justify-start items-center mt-2"
-                      >
-                        <p className="flex pr-2 py-1 items-center rounded-full  shadow-custom">
-                          <img
-                            alt="avatar"
-                            src={
-                              "https://localhost" +
-                              (isGroup
-                                ? groupDetails?.members.find(
-                                    (member) => member.id === item.senderId,
-                                  )?.avatar
-                                : userDetails?.avatar)
-                            }
-                            className="rounded-full mr-2 w-10 h-10"
-                          />
-                          {item.message}
-                        </p>
-                      </div>
-                    ),
-                  )}
+                  item.senderId === session.user.data?.id ? (
+                    <div
+                      key={index}
+                      className="flex justify-end items-center mt-2"
+                    >
+                      <p className="flex pl-2 py-1 items-center rounded-full  shadow-custom">
+                        {item.message}
+                        <img
+                          src={"https://localhost" + session.user.data.avatar}
+                          alt="avatar"
+                          className="rounded-full ml-2 w-10 h-10"
+                        />
+                      </p>
+                    </div>
+                  ) : (
+                    <div
+                      key={index}
+                      className="flex justify-start items-center mt-2"
+                    >
+                      <p className="flex pr-2 py-1 items-center rounded-full  shadow-custom">
+                        <img
+                          alt="avatar"
+                          src={
+                            "https://localhost" +
+                            (isGroup
+                              ? groupDetails?.members.find(
+                                (member) => member.id === item.senderId,
+                              )?.avatar
+                              : userDetails?.avatar)
+                          }
+                          className="rounded-full mr-2 w-10 h-10"
+                        />
+                        {item.message}
+                      </p>
+                    </div>
+                  ),
+                )}
               <div ref={messagesEndRef} />
             </div>
             <div
               id="controlls"
-              className={`flex rounded-md mt-8 mb-4 gap-4 ${
-                !chat ? "hidden" : ""
-              }`}
+              className={`flex rounded-md mt-8 mb-4 gap-4 ${!chat ? "hidden" : ""
+                }`}
             >
               <label
                 htmlFor="upload"
@@ -440,11 +481,10 @@ export default function Home() {
         )}
         <div
           id="userDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${
-            session.config.data?.chat?.details === true && isGroup === false
-              ? ""
-              : "hidden"
-          }`}
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${session.config.data?.chat?.details === true && isGroup === false
+            ? ""
+            : "hidden"
+            }`}
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
             <div
@@ -476,11 +516,10 @@ export default function Home() {
 
         <div
           id="groupDetails"
-          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${
-            session.config.data?.chat?.details && isGroup === true
-              ? ""
-              : "hidden"
-          }`}
+          className={`flex flex-col w-1/4 h-full p-4 shadow-[0_25px_50px_-12px_rgba(0,203,162,0.25)] ${session.config.data?.chat?.details && isGroup === true
+            ? ""
+            : "hidden"
+            }`}
         >
           <div id="head" className="flex flex-row gap-2 mb-4">
             <div
