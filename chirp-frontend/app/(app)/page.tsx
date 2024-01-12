@@ -168,8 +168,11 @@ export default function Home() {
           { Id: roomId, messages: [newMessage] },
         ]);
       }
-      setChat((prevChat) =>
-          prevChat ? [...prevChat, newMessage] : [newMessage]);
+      if(newMessage.senderId !== session.user.data?.id) {
+        setChat((prevChat) =>
+            prevChat ? [...prevChat, newMessage] : [newMessage]);
+        
+      }
     });
   }
 
@@ -320,7 +323,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    console.log("Hi")
     get_groups_and_chats();
 
       session.user.data?.groups.forEach((groupId) => {
