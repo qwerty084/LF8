@@ -1,7 +1,6 @@
 export const env = {
 //auth
   API_URL: "https://localhost/api",
-  GIT_TOKEN: "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",
 //10.8.0.3:3003
   WS_URL: "10.8.0.3:3003",
 
