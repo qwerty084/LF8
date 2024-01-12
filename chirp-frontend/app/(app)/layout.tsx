@@ -13,10 +13,10 @@ export default function RootLayout({
   const [searchInput, setSearchInput] = useState<string>();
 
   function meetandgreet() {
-    redirect("/meet&greet")
+    window.location.href = "/login"
   }
   function chats() {
-    redirect("/")
+    window.location.href = "/login"
   }
 
   if (!session.auth.isAuthenticated(session.user, session.config)) {

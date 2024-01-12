@@ -327,7 +327,7 @@ export default function Home() {
         joinRoom(groupId);
         console.log(groupId);
       });
-  }, [joinRoom]);
+  }, []);
 
 
   return (
