@@ -1,9 +1,8 @@
 export const env = {
 //auth
   API_URL: "https://localhost/api",
-
-
-  WS_URL: "http://localhost:3003",
+//10.8.0.3:3003
+  WS_URL: "10.8.0.3:3003",
 
 //Maping Items
   GIT_LABELS: ["issue", "bug"],

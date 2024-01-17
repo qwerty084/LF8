@@ -2,9 +2,16 @@ import { env } from "@/env";
 import Cookies from "js-cookie";
 import { SetStateAction, useEffect, useState } from "react";
 import { session } from "./auth.component";
+import { func } from "prop-types";
 
 type Group = {
     id: number;
+    name: string;
+    avatar: string;
+};
+
+type Contact = {
+    userid: number;
     name: string;
     avatar: string;
 };
@@ -62,15 +69,12 @@ function CreateGroup() {
             },
         });
         const data = await response.json();
-        console.log(data);
         if (response.status === 200) {
-            console.log(data);
             const groups = data.map((group: { id: any; name: any; avatar: any }) => ({
                 id: group.id,
                 name: group.name,
                 avatar: group.avatar,
             }));
-            console.log(groups);
             setAvaiableGroups(groups);
         }
     }
@@ -109,13 +113,10 @@ function CreateGroup() {
 
         groups?.push(`/api/groups/${groupId}`);
 
-        console.log(groups);
-
         const request_data = {
             groups: groups,
         };
 
-        console.log(request_data);
         const response = fetch(url, {
             method: "PATCH",
             headers: {
@@ -128,12 +129,18 @@ function CreateGroup() {
 
     async function create_group() {
         let url = `${env.API_URL}/groups`;
-        let avatarId = await uploadAvatar();
 
-        const request_data = {
+        // Added null check on avatarId
+        let avatarId = await uploadAvatar();
+        if (avatarId === null) {
+            return;
+        }
+
+        const group_request_data = {
             name: groupName,
-            avatar: `${env.API_URL}/api/media_objects/${avatarId}`,
+            avatar: avatarId,
             description: groupDescription,
+            isGroupChat: true,
         };
 
         const response = await fetch(url, {
@@ -142,8 +149,39 @@ function CreateGroup() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${Cookies.get("auth")}`,
             },
-            body: JSON.stringify(request_data),
+            body: JSON.stringify(group_request_data),
         });
+
+        let jsonResponse = await response.json();
+
+        if (response.ok) {
+            availableGroups.push(jsonResponse);
+
+            let url = `${env.API_URL}/users/${session.user.data?.id}`;
+
+            // Map each group id to "/api/groups/id"
+            let groups = session.user.data?.groups?.map((id) => `/api/groups/${id}`);
+
+            groups?.push(`/api/groups/${jsonResponse.id}`);
+
+            const request_data = {
+                groups: groups
+            };
+
+            const response = await fetch(url, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/merge-patch+json",
+                    Authorization: `Bearer ${Cookies.get("auth")}`,
+                },
+                body: JSON.stringify(request_data),
+            });
+
+            if (response.ok) {
+                const token: string = Cookies.get("refresh_token") || "";
+                session.user.refreshUser(token);
+            }
+        }
     }
 
     const handleUpload = async (event: any) => {
@@ -185,24 +223,23 @@ function CreateGroup() {
                                             />
                                             {item.name}
                                         </div>
-                                        {session.user.data?.groups.includes(
-                                            `/api/groups/${item.id}`,
-                                        ) ? (
-                                            <img
-                                                key={"img" + index}
-                                                src="/assets/check.png"
-                                                alt="Joined"
-                                                className="bg-transparent px-2 py-1 rounded-md shadow-custom w-1/6"
-                                            />
-                                        ) : (
-                                            <button
-                                                key={"button" + index}
-                                                className="bg-transparent p-2 rounded-md shadow-custom hover:scale-105 w-1/6"
-                                                onClick={() => joinGroup(item.id)}
-                                            >
-                                                Join
-                                            </button>
-                                        )}
+                                        {session.user.data?.groups.includes(item.id.toString())
+                                            ? (
+                                                <img
+                                                    key={"img" + index}
+                                                    src="/assets/check.png"
+                                                    alt="Joined"
+                                                    className="bg-transparent px-2 py-1 rounded-md shadow-custom w-1/6"
+                                                />
+                                            ) : (
+                                                <button
+                                                    key={"button" + index}
+                                                    className="bg-transparent p-2 rounded-md shadow-custom hover:scale-105 w-1/6"
+                                                    onClick={() => joinGroup(item.id)}
+                                                >
+                                                    Join
+                                                </button>
+                                            )}
                                     </div>
                                     <hr className="border-1 border-[#00cba2] mx-2" />
                                 </div>
@@ -232,9 +269,8 @@ function CreateGroup() {
                     <div className="flex justify-between mb-12 mx-4">
                         <input
                             type="file"
-                            className="bg-transparent p-2 w-2/5 mr-2 rounded-md shadow-custom focus:outline-none flex-shrink-0"
+                            className="bg-transparent p-2 w-2/5 mr-2 rounded-md shadow-custom focus:outline-none flex-shrink-0 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:${textColor} file:bg-transparent file:shadow-custom file:font-semibold"
                             placeholder="Group Name"
-                            value={groupName}
                             onChange={handleUpload}
                         />
                     </div>
@@ -255,12 +291,178 @@ function CreateGroup() {
 }
 
 function CreateContact() {
-    const [userId, setUserId] = useState<number>();
-    const [personalDescription, setPersonalDescription] = useState<string>();
+    const [searchInput, setSearchInput] = useState<string>();
+    const [availableContacts, setAvailableContacts] = useState<Contact[]>([
+        { userid: 0, name: "No Contacts avaiable", avatar: "" },
+    ]);
+    const [searchResults, setSearchResults] = useState<Contact[]>([]);
+
+    const handleChange = (event: {
+        target: { value: SetStateAction<string | undefined> };
+    }) => {
+        setSearchInput(event.target.value);
+    };
+
+    useEffect(() => {
+        if (searchInput) {
+            const results = availableContacts.filter((contact) =>
+                contact.name.toLowerCase().includes(searchInput.toLowerCase()),
+            );
+            setSearchResults(results);
+        }
+    }, [searchInput, availableContacts]);
+
+    async function get_contacts() {
+        let url = `${env.API_URL}/users`;
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Cookies.get("auth")}`,
+            },
+        });
+
+        const data = await response.json();
+
+        if (response.status === 200) {
+            const contacts = data
+                .filter((user: { id: number; username: string; avatar: string }) => user.id !== session.user.data?.id)
+                .map((user: { id: number; username: string; avatar: string }) => ({
+                    userid: user.id,
+                    name: user.username,
+                    avatar: user.avatar,
+                }));
+            setAvailableContacts(contacts);
+        }
+    }
+
+
+    async function handleAddContact(contact: Contact) {
+        let groupurl = `${env.API_URL}/groups`; 
+
+        const group_request_data = {
+            name: "",
+            avatar: "/api/media_objects/12",
+            description: "",
+            isGroupChat: false
+        };
+
+        const response = await fetch(groupurl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Cookies.get("auth")}`,
+            },
+            body: JSON.stringify(group_request_data),
+        });
+        let jsonResponse = await response.json();
+        if (response.status === 201) {
+            let groupId = jsonResponse.id;
+            let userurl = `${env.API_URL}/users/${session.user.data?.id}`;
+            
+            //Patch current user to add the group
+            let groups = session.user.data?.groups?.map((id) => `/api/groups/${id}`);
+            groups?.push(`/api/groups/${groupId}`);
+            const user_request_data = {
+                groups: groups
+            }
+
+            const user_response = await fetch(userurl, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/merge-patch+json",
+                    Authorization: `Bearer ${Cookies.get("auth")}`,
+                },
+                body: JSON.stringify(user_request_data),
+            });
+            if (response.ok) {
+                const token: string = Cookies.get("refresh_token") || "";
+                session.user.refreshUser(token);
+            }
+
+            //Patch other user u want to chat with
+            let user_id = contact.userid;
+            let user_url = `${env.API_URL}/users/${user_id}`;
+
+            const request = await fetch(user_url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/merge-patch+json",
+                    Authorization: `Bearer ${Cookies.get("auth")}`,
+                },
+            });
+            if (request.ok) {
+                const user_data = await request.json();
+                let groups2 = user_data.groups?.map((id: any) => `/api/groups/${id}`);
+                groups2?.push(`/api/groups/${groupId}`);
+                const user_request_data2 = {
+                    groups: groups
+                }
+                const user_response = await fetch(user_url, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/merge-patch+json",
+                        Authorization: `Bearer ${Cookies.get("auth")}`,
+                    },
+                    body: JSON.stringify(user_request_data2),
+                });
+            }
+        
+
+        }
+    }
+
+    useEffect(() => {
+        get_contacts();
+    }, []);
 
     return (
         <div className="w-full h-full">
-            <div className="flex justify-center">Add a Friend to your list</div>
+            <div className="flex flex-row w-5/6 h-5/6 m-20 shadow-custom rounded-md">
+                <div className="w-1/3 shadow-custom">
+                    <div className="flex justify-center items-center h-24 ">
+                        <input
+                            type="text"
+                            name="search"
+                            className="w-5/6 h-1/2 bg-transparent shadow-md text-center rounded-md focus:outline-none"
+                            placeholder="Search"
+                            value={searchInput}
+                            onChange={handleChange}
+                        />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                        {(searchInput ? searchResults : availableContacts).map(
+                            (item, index) => (
+                                <div key={index}>
+                                    <div
+                                        key={index}
+                                        className="flex justify-between m-2 items-center"
+                                    >
+                                        <div className="flex">
+                                            <img
+                                                src={"https://localhost" + item.avatar}
+                                                alt=""
+                                                className="rounded-full w-5 h-5 mr-2"
+                                            />
+                                            {item.name}
+                                        </div>
+
+                                        <button
+                                            key={"button" + index}
+                                            className="bg-transparent p-2 rounded-md shadow-custom hover:scale-105 w-1/6"
+                                            onClick={() => handleAddContact(item)}
+                                        >
+                                            chat
+                                        </button>
+                                    </div>
+                                    <hr className="border-1 border-[#00cba2] mx-2" />
+                                </div>
+                            ),
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

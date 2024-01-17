@@ -1,11 +1,10 @@
 "use client";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { session } from "@/components/auth.component";
-import { getTheme } from "@/app/layout";
+import { bgColor, itemColor, textColor, textaccent } from "@/components/components.layout";
 import { env } from "@/env";
 import Cookies from "js-cookie";
 
-const { bgColor, itemColor, textColor, textaccent } = getTheme();
 const Octokit = require("@octokit/core").Octokit;
 
 const octokit = new Octokit({
@@ -158,13 +157,17 @@ export function AccountFunc() {
       setSaving(true);
       setReadOnly(true);
 
-      const request_data = {
+      let request_data: any = {
         username: username,
         email: email,
         status: status,
-        bio: bio,
-        image: await uploadAvatar(),
-      };
+        bio: bio
+    };
+    
+    if (avatar) {
+        request_data.image = await uploadAvatar();
+    }
+
       console.log(request_data);
 
       const response = await fetch(url, {
@@ -179,6 +182,7 @@ export function AccountFunc() {
       const data = await response.json();
       if (response.status === 200) {
         setSaving(false);
+        session.user.refreshUser(Cookies.get("refresh_token") || "");
       } else {
         console.log(data);
       }
@@ -286,9 +290,8 @@ export function AccountFunc() {
               <p className="mb-2">Upload a Avatar for your Profile</p>
               <input
                 type="file"
-                className={`block w-full text-sm ${textColor} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:${textColor} file:bg-transparent file:shadow-custom file:font-semibold ${
-                  readOnly ? "" : "file:cursor-pointer"
-                }`}
+                className={`block w-full text-sm ${textColor} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:${textColor} file:bg-transparent file:shadow-custom file:font-semibold ${readOnly ? "" : "file:cursor-pointer"
+                  }`}
                 readOnly={readOnly}
                 disabled={readOnly}
                 onChange={handleUpload}
@@ -364,9 +367,8 @@ export function NotificationFunc() {
           {env.NotificationSounds.map((item, index) => (
             <button
               key={index}
-              className={`bg-transparent p-2 rounded-md shadow-custom ${
-                notificationSound === item ? "" : "hover:scale-105"
-              } ${notificationSound === item ? textaccent : ""}`}
+              className={`bg-transparent p-2 rounded-md shadow-custom ${notificationSound === item ? "" : "hover:scale-105"
+                } ${notificationSound === item ? textaccent : ""}`}
               disabled={notificationSound === item}
               onClick={() => notificationSoundFunc(item)}
             >
@@ -381,9 +383,8 @@ export function NotificationFunc() {
           {env.MutePeriod.map((item, index) => (
             <button
               key={index}
-              className={`bg-transparent p-2 rounded-md shadow-custom ${
-                muteTime === item.key ? "" : "hover:scale-105"
-              } ${muteTime === item.key ? textaccent : ""}`}
+              className={`bg-transparent p-2 rounded-md shadow-custom ${muteTime === item.key ? "" : "hover:scale-105"
+                } ${muteTime === item.key ? textaccent : ""}`}
               disabled={muteTime === item.key}
               onClick={() => muteFunc(item.key)}
             >
@@ -424,9 +425,8 @@ export function ChatSettingsFunc() {
           {themes.map((item, index) => (
             <button
               key={index}
-              className={`bg-transparent p-2 rounded-md shadow-custom ${
-                selectedTheme === item ? "" : "hover:scale-105"
-              } ${selectedTheme === item ? textaccent : ""}`}
+              className={`bg-transparent p-2 rounded-md shadow-custom ${selectedTheme === item ? "" : "hover:scale-105"
+                } ${selectedTheme === item ? textaccent : ""}`}
               disabled={selectedTheme === item}
               onClick={() => themeFunc(item)}
             >
@@ -438,9 +438,8 @@ export function ChatSettingsFunc() {
       <div className="shadow-custom mb-8 w-[50%] p-2 rounded-md">
         <p className="text-xl mb-2">Show Chat or Group details</p>
         <button
-          className={`bg-transparent p-2 rounded-md shadow-custom ${
-            chatDetails ? "" : textaccent
-          }`}
+          className={`bg-transparent p-2 rounded-md shadow-custom ${chatDetails ? "" : textaccent
+            }`}
           onClick={() => detailsFunc(!chatDetails)}
         >
           {chatDetails ? "enabled" : "disabled"}
@@ -548,9 +547,8 @@ export function PrivacyFunc() {
         <p className="text-xl mb-2">Block user</p>
         <p>Enter User Id to block</p>
         <div
-          className={`flex w-1/2 bg-transparent shadow-custom rounded-md py-1 px-2 mb-8 mt-2 ${
-            userError ? "border-2 border-red-500" : ""
-          }`}
+          className={`flex w-1/2 bg-transparent shadow-custom rounded-md py-1 px-2 mb-8 mt-2 ${userError ? "border-2 border-red-500" : ""
+            }`}
         >
           <input
             type="number"
@@ -570,9 +568,8 @@ export function PrivacyFunc() {
             <div key={index} className="p-2 shadow-custom rounded-md">
               {item.userName}
               <button
-                className={`ml-2 ${
-                  item.id === 0 ? "hidden" : ""
-                } ${textColor} hover:text-red-500`}
+                className={`ml-2 ${item.id === 0 ? "hidden" : ""
+                  } ${textColor} hover:text-red-500`}
                 onClick={() => handleRemoveBlock(item.id)}
               >
                 X
@@ -587,9 +584,8 @@ export function PrivacyFunc() {
           {privacyLevels.map((item, index) => (
             <button
               key={index}
-              className={`bg-transparent p-2 rounded-md shadow-custom ${
-                friendInviteLEvel === item.level ? "" : "hover:scale-105"
-              } ${friendInviteLEvel === item.level ? textaccent : ""}`}
+              className={`bg-transparent p-2 rounded-md shadow-custom ${friendInviteLEvel === item.level ? "" : "hover:scale-105"
+                } ${friendInviteLEvel === item.level ? textaccent : ""}`}
               disabled={friendInviteLEvel === item.level}
               onClick={() => friendInviteLEvelFunc(item.level)}
             >
@@ -604,9 +600,8 @@ export function PrivacyFunc() {
           {privacyLevels.map((item, index) => (
             <button
               key={index}
-              className={`bg-transparent p-2 rounded-md shadow-custom ${
-                meetInviteLevel === item.level ? "" : "hover:scale-105"
-              } ${meetInviteLevel === item.level ? textaccent : ""}`}
+              className={`bg-transparent p-2 rounded-md shadow-custom ${meetInviteLevel === item.level ? "" : "hover:scale-105"
+                } ${meetInviteLevel === item.level ? textaccent : ""}`}
               disabled={meetInviteLevel === item.level}
               onClick={() => meetInviteLevelFunc(item.level)}
             >
@@ -756,9 +751,8 @@ export function HelpSupportFunc() {
           {env.GIT_LABELS.map((item, index) => (
             <button
               key={index}
-              className={`bg-transparent p-2 rounded-md shadow-custom ${
-                label === item ? "" : "hover:scale-105"
-              } ${label === item ? textaccent : ""}`}
+              className={`bg-transparent p-2 rounded-md shadow-custom ${label === item ? "" : "hover:scale-105"
+                } ${label === item ? textaccent : ""}`}
               disabled={label === item}
               onClick={() => setLabel(item)}
             >
